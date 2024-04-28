@@ -34,7 +34,9 @@ class PythonCodeParser : public CodeParserInterface
 {
   public:
     PythonCodeParser();
-    virtual ~PythonCodeParser();
+   ~PythonCodeParser() override;
+    NON_COPYABLE(PythonCodeParser)
+
     void parseTextCode(OutputCodeList &codeOutIntf,
                    const QCString &scopeName,
                    const QCString &input,
@@ -49,8 +51,8 @@ class PythonCodeParser : public CodeParserInterface
                    bool showLineNumbers=TRUE,
                    const Definition *searchCtx=nullptr,
                    bool collectXrefs=TRUE
-                  );
-    void resetCodeParserState();
+                  ) override;
+    void resetCodeParserState() override;
     CODE_PARSER_REJECT_BINARY;
   private:
     struct Private;

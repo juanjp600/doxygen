@@ -209,10 +209,10 @@ static const std::map< std::string, DocCmdMap > docCmdMap =
   { "addtogroup",             { &handleAddToGroup,               CommandSpacing::Invisible, SectionHandling::Escape  }},
   { "anchor",                 { &handleAnchor,                   CommandSpacing::Invisible, SectionHandling::Replace }},
   { "ianchor",                { &handleAnchor,                   CommandSpacing::Invisible, SectionHandling::Replace }},
-  { "arg",                    { 0,                               CommandSpacing::Block,     SectionHandling::Break   }},
-  { "attention",              { 0,                               CommandSpacing::Block,     SectionHandling::Break   }},
-  { "author",                 { 0,                               CommandSpacing::Block,     SectionHandling::Break   }},
-  { "authors",                { 0,                               CommandSpacing::Block,     SectionHandling::Break   }},
+  { "arg",                    { nullptr,                         CommandSpacing::Block,     SectionHandling::Break   }},
+  { "attention",              { nullptr,                         CommandSpacing::Block,     SectionHandling::Break   }},
+  { "author",                 { nullptr,                         CommandSpacing::Block,     SectionHandling::Break   }},
+  { "authors",                { nullptr,                         CommandSpacing::Block,     SectionHandling::Break   }},
   { "brief",                  { &handleBrief,                    CommandSpacing::Invisible, SectionHandling::Break   }},
   { "bug",                    { &handleBug,                      CommandSpacing::XRef,      SectionHandling::Break   }},
   { "callergraph",            { &handleCallergraph,              CommandSpacing::Invisible, SectionHandling::Escape  }},
@@ -227,27 +227,27 @@ static const std::map< std::string, DocCmdMap > docCmdMap =
   { "copybrief",              { &handleCopyBrief,                CommandSpacing::Invisible, SectionHandling::Escape  }},
   { "copydetails",            { &handleCopyDetails,              CommandSpacing::Block,     SectionHandling::Escape  }},
   { "copydoc",                { &handleCopyDoc,                  CommandSpacing::Block,     SectionHandling::Escape  }},
-  { "copyright",              { 0,                               CommandSpacing::Block,     SectionHandling::Break   }},
-  { "showdate",               { 0,                               CommandSpacing::Inline,    SectionHandling::Allowed }},
-  { "date",                   { 0,                               CommandSpacing::Block,     SectionHandling::Break   }},
+  { "copyright",              { nullptr,                         CommandSpacing::Block,     SectionHandling::Break   }},
+  { "showdate",               { nullptr,                         CommandSpacing::Inline,    SectionHandling::Allowed }},
+  { "date",                   { nullptr,                         CommandSpacing::Block,     SectionHandling::Break   }},
   { "def",                    { &handleDef,                      CommandSpacing::Invisible, SectionHandling::Escape  }},
   { "defgroup",               { &handleDefGroup,                 CommandSpacing::Invisible, SectionHandling::Escape  }},
   { "deprecated",             { &handleDeprecated,               CommandSpacing::XRef,      SectionHandling::Break   }},
   { "details",                { &handleDetails,                  CommandSpacing::Block,     SectionHandling::Break   }},
-  { "diafile",                { 0,                               CommandSpacing::Block,     SectionHandling::Break   }},
+  { "diafile",                { nullptr,                         CommandSpacing::Block,     SectionHandling::Break   }},
   { "dir",                    { &handleDir,                      CommandSpacing::Invisible, SectionHandling::Escape  }},
   { "directorygraph",         { &handleDirectoryGraph,           CommandSpacing::Invisible, SectionHandling::Escape  }},
-  { "docbookinclude",         { 0,                               CommandSpacing::Inline,    SectionHandling::Break   }},
+  { "docbookinclude",         { nullptr,                         CommandSpacing::Inline,    SectionHandling::Break   }},
   { "docbookonly",            { &handleFormatBlock,              CommandSpacing::Invisible, SectionHandling::Break   }},
   { "dot",                    { &handleFormatBlock,              CommandSpacing::Block,     SectionHandling::Break   }},
-  { "dotfile",                { 0,                               CommandSpacing::Block,     SectionHandling::Break   }},
+  { "dotfile",                { nullptr,                         CommandSpacing::Block,     SectionHandling::Break   }},
   { "else",                   { &handleElse,                     CommandSpacing::Inline,    SectionHandling::Escape  }},
   { "elseif",                 { &handleElseIf,                   CommandSpacing::Inline,    SectionHandling::Escape  }},
   { "endif",                  { &handleEndIf,                    CommandSpacing::Inline,    SectionHandling::Escape  }},
   { "endparblock",            { &handleEndParBlock,              CommandSpacing::Block,     SectionHandling::Escape  }},
   { "enum",                   { &handleEnum,                     CommandSpacing::Invisible, SectionHandling::Escape  }},
   { "example",                { &handleExample,                  CommandSpacing::Invisible, SectionHandling::Escape  }},
-  { "exception",              { 0,                               CommandSpacing::Block,     SectionHandling::Break   }},
+  { "exception",              { nullptr,                         CommandSpacing::Block,     SectionHandling::Break   }},
   { "extends",                { &handleExtends,                  CommandSpacing::Invisible, SectionHandling::Escape  }},
   { "file",                   { &handleFile,                     CommandSpacing::Invisible, SectionHandling::Escape  }},
   { "fn",                     { &handleFn,                       CommandSpacing::Invisible, SectionHandling::Escape  }},
@@ -265,49 +265,49 @@ static const std::map< std::string, DocCmdMap > docCmdMap =
   { "hideinlinesource",       { &handleHideInlineSource,         CommandSpacing::Invisible, SectionHandling::Escape  }},
   { "hiderefby",              { &handleHideReferencedByRelation, CommandSpacing::Invisible, SectionHandling::Escape  }},
   { "hiderefs",               { &handleHideReferencesRelation,   CommandSpacing::Invisible, SectionHandling::Escape  }},
-  { "htmlinclude",            { 0,                               CommandSpacing::Inline,    SectionHandling::Break   }},
+  { "htmlinclude",            { nullptr,                         CommandSpacing::Inline,    SectionHandling::Break   }},
   { "htmlonly",               { &handleFormatBlock,              CommandSpacing::Invisible, SectionHandling::Break   }},
   { "idlexcept",              { &handleIdlException,             CommandSpacing::Invisible, SectionHandling::Escape  }},
   { "if",                     { &handleIf,                       CommandSpacing::Inline,    SectionHandling::Break   }},
   { "ifnot",                  { &handleIfNot,                    CommandSpacing::Inline,    SectionHandling::Break   }},
   { "image",                  { &handleImage,                    CommandSpacing::Block,     SectionHandling::Break   }},
   { "implements",             { &handleExtends,                  CommandSpacing::Invisible, SectionHandling::Escape  }},
-  { "important",              { 0,                               CommandSpacing::Block,     SectionHandling::Break   }},
-  { "include",                { 0,                               CommandSpacing::Block,     SectionHandling::Break   }},
+  { "important",              { nullptr,                         CommandSpacing::Block,     SectionHandling::Break   }},
+  { "include",                { nullptr,                         CommandSpacing::Block,     SectionHandling::Break   }},
   { "includedbygraph",        { &handleIncludedBygraph,          CommandSpacing::Invisible, SectionHandling::Escape  }},
   { "includegraph",           { &handleIncludegraph,             CommandSpacing::Invisible, SectionHandling::Escape  }},
-  { "includelineno",          { 0,                               CommandSpacing::Block,     SectionHandling::Break   }},
+  { "includelineno",          { nullptr,                         CommandSpacing::Block,     SectionHandling::Break   }},
   { "ingroup",                { &handleIngroup,                  CommandSpacing::Invisible, SectionHandling::Escape  }},
   { "inherit",                { &handleInherit,                  CommandSpacing::Invisible, SectionHandling::Escape  }},
   { "inheritancegraph",       { &handleInheritanceGraph,         CommandSpacing::Invisible, SectionHandling::Escape  }},
   { "interface",              { &handleInterface,                CommandSpacing::Invisible, SectionHandling::Escape  }},
   { "internal",               { &handleInternal,                 CommandSpacing::Block,     SectionHandling::Break   }},
-  { "invariant",              { 0,                               CommandSpacing::Block,     SectionHandling::Break   }},
-  { "latexinclude",           { 0,                               CommandSpacing::Inline,    SectionHandling::Break   }},
+  { "invariant",              { nullptr,                         CommandSpacing::Block,     SectionHandling::Break   }},
+  { "latexinclude",           { nullptr,                         CommandSpacing::Inline,    SectionHandling::Break   }},
   { "latexonly",              { &handleFormatBlock,              CommandSpacing::Invisible, SectionHandling::Break   }},
-  { "li",                     { 0,                               CommandSpacing::Block,     SectionHandling::Break   }},
-  { "line",                   { 0,                               CommandSpacing::Invisible, SectionHandling::Escape  }},
+  { "li",                     { nullptr,                         CommandSpacing::Block,     SectionHandling::Break   }},
+  { "line",                   { nullptr,                         CommandSpacing::Invisible, SectionHandling::Escape  }},
   { "mainpage",               { &handleMainpage,                 CommandSpacing::Invisible, SectionHandling::Break   }},
-  { "maninclude",             { 0,                               CommandSpacing::Inline,    SectionHandling::Break   }},
+  { "maninclude",             { nullptr,                         CommandSpacing::Inline,    SectionHandling::Break   }},
   { "manonly",                { &handleFormatBlock,              CommandSpacing::Invisible, SectionHandling::Break   }},
   { "memberof",               { &handleMemberOf,                 CommandSpacing::Invisible, SectionHandling::Escape  }},
   { "module",                 { &handleModule,                   CommandSpacing::Invisible, SectionHandling::Escape  }},
   { "msc",                    { &handleFormatBlock,              CommandSpacing::Block,     SectionHandling::Break   }},
-  { "mscfile",                { 0,                               CommandSpacing::Block,     SectionHandling::Break   }},
+  { "mscfile",                { nullptr,                         CommandSpacing::Block,     SectionHandling::Break   }},
   { "name",                   { &handleName,                     CommandSpacing::Invisible, SectionHandling::Escape  }},
   { "namespace",              { &handleNamespace,                CommandSpacing::Invisible, SectionHandling::Escape  }},
   { "noop",                   { &handleNoop,                     CommandSpacing::Invisible, SectionHandling::Replace }},
   { "nosubgrouping",          { &handleNoSubGrouping,            CommandSpacing::Invisible, SectionHandling::Escape  }},
-  { "note",                   { 0,                               CommandSpacing::Block,     SectionHandling::Break   }},
+  { "note",                   { nullptr,                         CommandSpacing::Block,     SectionHandling::Break   }},
   { "overload",               { &handleOverload,                 CommandSpacing::Invisible, SectionHandling::Escape  }},
   { "package",                { &handlePackage,                  CommandSpacing::Invisible, SectionHandling::Escape  }},
   { "page",                   { &handlePage,                     CommandSpacing::Invisible, SectionHandling::Break   }},
-  { "par",                    { 0,                               CommandSpacing::Block,     SectionHandling::Break   }},
+  { "par",                    { nullptr,                         CommandSpacing::Block,     SectionHandling::Break   }},
   { "paragraph",              { &handleSection,                  CommandSpacing::Block,     SectionHandling::Break   }},
   { "param",                  { &handleParam,                    CommandSpacing::Block,     SectionHandling::Break   }},
   { "parblock",               { &handleParBlock,                 CommandSpacing::Block,     SectionHandling::Break   }},
-  { "post",                   { 0,                               CommandSpacing::Block,     SectionHandling::Break   }},
-  { "pre",                    { 0,                               CommandSpacing::Block,     SectionHandling::Break   }},
+  { "post",                   { nullptr,                         CommandSpacing::Block,     SectionHandling::Break   }},
+  { "pre",                    { nullptr,                         CommandSpacing::Block,     SectionHandling::Break   }},
   { "private",                { &handlePrivate,                  CommandSpacing::Invisible, SectionHandling::Escape  }},
   { "privatesection",         { &handlePrivateSection,           CommandSpacing::Invisible, SectionHandling::Escape  }},
   { "property",               { &handleFn,                       CommandSpacing::Invisible, SectionHandling::Escape  }},
@@ -324,25 +324,25 @@ static const std::map< std::string, DocCmdMap > docCmdMap =
   { "relatedalso",            { &handleRelatedAlso,              CommandSpacing::Invisible, SectionHandling::Escape  }},
   { "relates",                { &handleRelated,                  CommandSpacing::Invisible, SectionHandling::Escape  }},
   { "relatesalso",            { &handleRelatedAlso,              CommandSpacing::Invisible, SectionHandling::Escape  }},
-  { "remark",                 { 0,                               CommandSpacing::Block,     SectionHandling::Break   }},
-  { "remarks",                { 0,                               CommandSpacing::Block,     SectionHandling::Break   }},
-  { "result",                 { 0,                               CommandSpacing::Block,     SectionHandling::Break   }},
-  { "return",                 { 0,                               CommandSpacing::Block,     SectionHandling::Break   }},
-  { "returns",                { 0,                               CommandSpacing::Block,     SectionHandling::Break   }},
+  { "remark",                 { nullptr,                         CommandSpacing::Block,     SectionHandling::Break   }},
+  { "remarks",                { nullptr,                         CommandSpacing::Block,     SectionHandling::Break   }},
+  { "result",                 { nullptr,                         CommandSpacing::Block,     SectionHandling::Break   }},
+  { "return",                 { nullptr,                         CommandSpacing::Block,     SectionHandling::Break   }},
+  { "returns",                { nullptr,                         CommandSpacing::Block,     SectionHandling::Break   }},
   { "retval",                 { &handleRetval,                   CommandSpacing::Block,     SectionHandling::Break   }},
-  { "rtfinclude",             { 0,                               CommandSpacing::Inline,    SectionHandling::Break   }},
+  { "rtfinclude",             { nullptr,                         CommandSpacing::Inline,    SectionHandling::Break   }},
   { "rtfonly",                { &handleFormatBlock,              CommandSpacing::Invisible, SectionHandling::Break   }},
-  { "sa",                     { 0,                               CommandSpacing::Block,     SectionHandling::Break   }},
+  { "sa",                     { nullptr,                         CommandSpacing::Block,     SectionHandling::Break   }},
   { "section",                { &handleSection,                  CommandSpacing::Block,     SectionHandling::Break   }},
-  { "see",                    { 0,                               CommandSpacing::Block,     SectionHandling::Break   }},
+  { "see",                    { nullptr,                         CommandSpacing::Block,     SectionHandling::Break   }},
   { "short",                  { &handleBrief,                    CommandSpacing::Invisible, SectionHandling::Break   }},
   { "showinitializer",        { &handleShowInitializer,          CommandSpacing::Invisible, SectionHandling::Escape  }},
   { "showinlinesource",       { &handleShowInlineSource,         CommandSpacing::Invisible, SectionHandling::Escape  }},
   { "showrefby",              { &handleReferencedByRelation,     CommandSpacing::Invisible, SectionHandling::Escape  }},
   { "showrefs",               { &handleReferencesRelation,       CommandSpacing::Invisible, SectionHandling::Escape  }},
-  { "since",                  { 0,                               CommandSpacing::Block,     SectionHandling::Break   }},
-  { "snippet",                { 0,                               CommandSpacing::Block,     SectionHandling::Break   }},
-  { "snippetlineno",          { 0,                               CommandSpacing::Block,     SectionHandling::Break   }},
+  { "since",                  { nullptr,                         CommandSpacing::Block,     SectionHandling::Break   }},
+  { "snippet",                { nullptr,                         CommandSpacing::Block,     SectionHandling::Break   }},
+  { "snippetlineno",          { nullptr,                         CommandSpacing::Block,     SectionHandling::Break   }},
   { "startuml",               { &handleFormatBlock,              CommandSpacing::Block,     SectionHandling::Break   }},
   { "static",                 { &handleStatic,                   CommandSpacing::Invisible, SectionHandling::Escape  }},
   { "struct",                 { &handleStruct,                   CommandSpacing::Invisible, SectionHandling::Escape  }},
@@ -353,48 +353,48 @@ static const std::map< std::string, DocCmdMap > docCmdMap =
   { "subsubsection",          { &handleSection,                  CommandSpacing::Block,     SectionHandling::Break   }},
   { "tableofcontents",        { &handleToc,                      CommandSpacing::Invisible, SectionHandling::Break   }},
   { "test",                   { &handleTest,                     CommandSpacing::XRef,      SectionHandling::Break   }},
-  { "throw",                  { 0,                               CommandSpacing::Block,     SectionHandling::Break   }},
-  { "throws",                 { 0,                               CommandSpacing::Block,     SectionHandling::Break   }},
+  { "throw",                  { nullptr,                         CommandSpacing::Block,     SectionHandling::Break   }},
+  { "throws",                 { nullptr,                         CommandSpacing::Block,     SectionHandling::Break   }},
   { "todo",                   { &handleTodo,                     CommandSpacing::XRef,      SectionHandling::Break   }},
-  { "tparam",                 { 0,                               CommandSpacing::Block,     SectionHandling::Break   }},
+  { "tparam",                 { nullptr,                         CommandSpacing::Block,     SectionHandling::Break   }},
   { "typedef",                { &handleFn,                       CommandSpacing::Invisible, SectionHandling::Escape  }},
   { "union",                  { &handleUnion,                    CommandSpacing::Invisible, SectionHandling::Escape  }},
-  { "until",                  { 0,                               CommandSpacing::Block,     SectionHandling::Escape  }},
+  { "until",                  { nullptr,                         CommandSpacing::Block,     SectionHandling::Escape  }},
   { "var",                    { &handleFn,                       CommandSpacing::Invisible, SectionHandling::Escape  }},
   { "verbatim",               { &handleFormatBlock,              CommandSpacing::Block,     SectionHandling::Break   }},
   { "iverbatim",              { &handleFormatBlock,              CommandSpacing::Block,     SectionHandling::Break   }},
-  { "verbinclude",            { 0,                               CommandSpacing::Inline,    SectionHandling::Break   }},
-  { "version",                { 0,                               CommandSpacing::Block,     SectionHandling::Break   }},
-  { "warning",                { 0,                               CommandSpacing::Block,     SectionHandling::Break   }},
+  { "verbinclude",            { nullptr,                         CommandSpacing::Inline,    SectionHandling::Break   }},
+  { "version",                { nullptr,                         CommandSpacing::Block,     SectionHandling::Break   }},
+  { "warning",                { nullptr,                         CommandSpacing::Block,     SectionHandling::Break   }},
   { "weakgroup",              { &handleWeakGroup,                CommandSpacing::Invisible, SectionHandling::Escape  }},
-  { "xmlinclude",             { 0,                               CommandSpacing::Inline,    SectionHandling::Break   }},
+  { "xmlinclude",             { nullptr,                         CommandSpacing::Inline,    SectionHandling::Break   }},
   { "xmlonly",                { &handleFormatBlock,              CommandSpacing::Invisible, SectionHandling::Break   }},
   { "xrefitem",               { &handleXRefItem,                 CommandSpacing::XRef,      SectionHandling::Break   }},
   { "iliteral",               { &handleFormatBlock,              CommandSpacing::Inline,    SectionHandling::Break   }},
   { "fileinfo",               { &handleFileInfo,                 CommandSpacing::Inline,    SectionHandling::Replace }},
   { "lineinfo",               { &handleLineInfo,                 CommandSpacing::Inline,    SectionHandling::Replace }},
-  { "secreflist",             { 0,                               CommandSpacing::Invisible, SectionHandling::Break   }},
-  { "endsecreflist",          { 0,                               CommandSpacing::Invisible, SectionHandling::Escape  }},
-  { "dontinclude",            { 0,                               CommandSpacing::Invisible, SectionHandling::Break   }},
-  { "line",                   { 0,                               CommandSpacing::Invisible, SectionHandling::Escape  }},
-  { "skip",                   { 0,                               CommandSpacing::Invisible, SectionHandling::Escape  }},
-  { "skipline",               { 0,                               CommandSpacing::Invisible, SectionHandling::Escape  }},
-  { "until",                  { 0,                               CommandSpacing::Invisible, SectionHandling::Escape  }},
-  { "vhdlflow",               { 0,                               CommandSpacing::Block,     SectionHandling::Break   }},
-  { "enddot",                 { 0,                               CommandSpacing::Invisible, SectionHandling::Escape  }},
-  { "endmsc",                 { 0,                               CommandSpacing::Invisible, SectionHandling::Escape  }},
-  { "enduml",                 { 0,                               CommandSpacing::Invisible, SectionHandling::Escape  }},
-  { "endicode",               { 0,                               CommandSpacing::Invisible, SectionHandling::Escape  }},
-  { "endcode",                { 0,                               CommandSpacing::Invisible, SectionHandling::Escape  }},
-  { "endverbatim",            { 0,                               CommandSpacing::Invisible, SectionHandling::Escape  }},
-  { "enddocbookonly",         { 0,                               CommandSpacing::Invisible, SectionHandling::Escape  }},
-  { "endhtmlonly",            { 0,                               CommandSpacing::Invisible, SectionHandling::Escape  }},
-  { "endlatexonly",           { 0,                               CommandSpacing::Invisible, SectionHandling::Escape  }},
-  { "endmanonly",             { 0,                               CommandSpacing::Invisible, SectionHandling::Escape  }},
-  { "endrtfonly",             { 0,                               CommandSpacing::Invisible, SectionHandling::Escape  }},
-  { "endxmlonly",             { 0,                               CommandSpacing::Invisible, SectionHandling::Escape  }},
-  { "link",                   { 0,                               CommandSpacing::Invisible, SectionHandling::Replace }},
-  { "endlink",                { 0,                               CommandSpacing::Invisible, SectionHandling::Escape  }},
+  { "secreflist",             { nullptr,                         CommandSpacing::Invisible, SectionHandling::Break   }},
+  { "endsecreflist",          { nullptr,                         CommandSpacing::Invisible, SectionHandling::Escape  }},
+  { "dontinclude",            { nullptr,                         CommandSpacing::Invisible, SectionHandling::Break   }},
+  { "line",                   { nullptr,                         CommandSpacing::Invisible, SectionHandling::Escape  }},
+  { "skip",                   { nullptr,                         CommandSpacing::Invisible, SectionHandling::Escape  }},
+  { "skipline",               { nullptr,                         CommandSpacing::Invisible, SectionHandling::Escape  }},
+  { "until",                  { nullptr,                         CommandSpacing::Invisible, SectionHandling::Escape  }},
+  { "vhdlflow",               { nullptr,                         CommandSpacing::Block,     SectionHandling::Break   }},
+  { "enddot",                 { nullptr,                         CommandSpacing::Invisible, SectionHandling::Escape  }},
+  { "endmsc",                 { nullptr,                         CommandSpacing::Invisible, SectionHandling::Escape  }},
+  { "enduml",                 { nullptr,                         CommandSpacing::Invisible, SectionHandling::Escape  }},
+  { "endicode",               { nullptr,                         CommandSpacing::Invisible, SectionHandling::Escape  }},
+  { "endcode",                { nullptr,                         CommandSpacing::Invisible, SectionHandling::Escape  }},
+  { "endverbatim",            { nullptr,                         CommandSpacing::Invisible, SectionHandling::Escape  }},
+  { "enddocbookonly",         { nullptr,                         CommandSpacing::Invisible, SectionHandling::Escape  }},
+  { "endhtmlonly",            { nullptr,                         CommandSpacing::Invisible, SectionHandling::Escape  }},
+  { "endlatexonly",           { nullptr,                         CommandSpacing::Invisible, SectionHandling::Escape  }},
+  { "endmanonly",             { nullptr,                         CommandSpacing::Invisible, SectionHandling::Escape  }},
+  { "endrtfonly",             { nullptr,                         CommandSpacing::Invisible, SectionHandling::Escape  }},
+  { "endxmlonly",             { nullptr,                         CommandSpacing::Invisible, SectionHandling::Escape  }},
+  { "link",                   { nullptr,                         CommandSpacing::Invisible, SectionHandling::Replace }},
+  { "endlink",                { nullptr,                         CommandSpacing::Invisible, SectionHandling::Escape  }},
   { "ifile",                  { &handleIFile,                    CommandSpacing::Invisible, SectionHandling::Replace }},
   { "iline",                  { &handleILine,                    CommandSpacing::Invisible, SectionHandling::Replace }},
   { "iraise",                 { &handleIRaise,                   CommandSpacing::Invisible, SectionHandling::Replace }},
@@ -431,26 +431,6 @@ enum GuardType
   Guard_ElseIf
 };
 
-class GuardedSection
-{
-  public:
-    GuardedSection(bool parentVisible)
-      : m_parentVisible(parentVisible) {}
-    void setEnabled(bool enabled) { m_enabled = enabled; }
-    bool isEnabled() const { return m_enabled; }
-    void setEnabledFound() { m_enabledFound = true; }
-    bool isEnabledFound() const { return m_enabledFound; }
-    bool parentVisible() const { return m_parentVisible; }
-    void setElse() { m_hasElse = true; }
-    bool hasElse() const { return m_hasElse; }
-
-  private:
-    bool m_parentVisible;
-    bool m_enabledFound = false;
-    bool m_enabled = false;
-    bool m_hasElse = false;
-};
-
 /* -----------------------------------------------------------------
  *
  *        statics
@@ -473,15 +453,15 @@ struct commentscanYY_state
   QCString         formulaText;            // Running text of a formula
   QCString         formulaEnv;             // environment name
   int              formulaNewLines = 0;    // amount of new lines in the formula
-  QCString        *pOutputString = nullptr;      // pointer to string to which the output is appended.
+  QCString        *pOutputString = nullptr;  // pointer to string to which the output is appended.
   QCString         outputXRef;               // temp argument of todo/test/../xrefitem commands
   QCString         blockName;                // preformatted block name (e.g. verbatim, latexonly,...)
   XRefKind         xrefKind    = XRef_Item;  // kind of cross-reference command
   XRefKind         newXRefKind = XRef_Item;  //
   GuardType        guardType = Guard_If;     // kind of guards for conditional section
-  QCString         functionProto;          // function prototype
-  std::stack<GuardedSection> guards;             // tracks nested conditional sections (if,ifnot,..)
-  Entry           *current = nullptr;              // working entry
+  QCString         functionProto;            // function prototype
+  GuardedSectionStack *guards = nullptr;     // tracks nested conditional sections (if,ifnot,..)
+  Entry           *current = nullptr;        // working entry
 
   bool             needNewEntry = FALSE;
 
@@ -974,7 +954,7 @@ STopt  [^\n@\\]*
 #endif
                                               yyterminate();
                                             }
-                                            else if (it->second.handler==0)
+                                            else if (it->second.handler==nullptr)
                                             {
                                               // command without handler, to be processed
                                               // later by parsedoc.cpp
@@ -1693,7 +1673,7 @@ STopt  [^\n@\\]*
 
   /* ----- handle arguments of the qualifier command ----- */
 <Qualifier>{LABELID}                    { // unquoted version, simple label
-                                          yyextra->current->qualifiers.push_back(yytext);
+                                          yyextra->current->qualifiers.emplace_back(yytext);
                                           BEGIN( Comment );
                                         }
 <Qualifier>"\""[^\"]*"\""               { // quotes version, add without quotes
@@ -2084,7 +2064,7 @@ STopt  [^\n@\\]*
                                           addOutput(yyscanner,yytext);
                                           // we add subpage labels as a kind of "inheritance" relation to prevent
                                           // needing to add another list to the Entry class.
-                                          yyextra->current->extends.push_back(BaseInfo(QCString(yytext),Protection::Public,Specifier::Normal));
+                                          yyextra->current->extends.emplace_back(QCString(yytext),Protection::Public,Specifier::Normal);
                                           BEGIN(SubpageTitle);
                                         }
 <SubpageLabel>{DOCNL}                   { // missing argument
@@ -2292,16 +2272,16 @@ STopt  [^\n@\\]*
 
 <SkipGuardedSection>{CMD}"ifnot"/{NW}   {
                                           yyextra->guardType = Guard_IfNot;
-                                          yyextra->guards.push(GuardedSection(false));
+                                          yyextra->guards->emplace(false);
                                           BEGIN( GuardParam );
                                         }
 <SkipGuardedSection>{CMD}"if"/{NW}      {
                                           yyextra->guardType = Guard_If;
-                                          yyextra->guards.push(GuardedSection(false));
+                                          yyextra->guards->emplace(false);
                                           BEGIN( GuardParam );
                                         }
 <SkipGuardedSection>{CMD}"endif"/{NW}   {
-                                          if (yyextra->guards.empty())
+                                          if (yyextra->guards->empty())
                                           {
                                             warn(yyextra->fileName,yyextra->lineNr,
                                                 "found \\endif without matching start command");
@@ -2309,14 +2289,14 @@ STopt  [^\n@\\]*
                                           }
                                           else
                                           {
-                                            yyextra->guards.pop();
-                                            if (yyextra->guards.empty())
+                                            yyextra->guards->pop();
+                                            if (yyextra->guards->empty())
                                             {
                                               BEGIN( GuardParamEnd );
                                             }
                                             else
                                             {
-                                              if (yyextra->guards.top().isEnabled())
+                                              if (yyextra->guards->top().isEnabled())
                                               {
                                                 BEGIN( GuardParamEnd );
                                               }
@@ -2328,64 +2308,64 @@ STopt  [^\n@\\]*
                                           }
                                         }
 <SkipGuardedSection>{CMD}"else"/{NW}    {
-                                          if (yyextra->guards.empty())
+                                          if (yyextra->guards->empty())
                                           {
                                             warn(yyextra->fileName,yyextra->lineNr,
                                                 "found \\else without matching start command");
                                           }
-                                          else if (yyextra->guards.top().hasElse())
+                                          else if (yyextra->guards->top().hasElse())
                                           {
                                             warn(yyextra->fileName,yyextra->lineNr,
                                                 "found multiple \\else commands in same \\if construct");
-                                            yyextra->guards.top().setEnabled(false);
+                                            yyextra->guards->top().setEnabled(false);
                                             BEGIN( SkipGuardedSection );
                                           }
-                                          else if (!yyextra->guards.top().parentVisible())
+                                          else if (!yyextra->guards->top().parentVisible())
                                           {
-                                            yyextra->guards.top().setEnabled(false);
+                                            yyextra->guards->top().setEnabled(false);
                                             BEGIN( SkipGuardedSection );
                                           }
                                           else
                                           {
                                             yyextra->spaceBeforeIf = yyextra->spaceBeforeCmd;
-                                            yyextra->guards.top().setElse();
-                                            if (!yyextra->guards.top().parentVisible())
+                                            yyextra->guards->top().setElse();
+                                            if (!yyextra->guards->top().parentVisible())
                                             {
-                                              yyextra->guards.top().setEnabled(false);
+                                              yyextra->guards->top().setEnabled(false);
                                               BEGIN( SkipGuardedSection );
                                             }
-                                            else if (yyextra->guards.top().isEnabledFound())
+                                            else if (yyextra->guards->top().isEnabledFound())
                                             {
-                                              yyextra->guards.top().setEnabled(false);
+                                              yyextra->guards->top().setEnabled(false);
                                               BEGIN( SkipGuardedSection );
                                             }
                                             else
                                             {
-                                              yyextra->guards.top().setEnabled(true);
+                                              yyextra->guards->top().setEnabled(true);
                                               BEGIN( GuardParamEnd );
                                             }
                                           }
                                         }
 <SkipGuardedSection>{CMD}"elseif"/{NW}  {
-                                          if (yyextra->guards.empty())
+                                          if (yyextra->guards->empty())
                                           {
                                             warn(yyextra->fileName,yyextra->lineNr,
                                                 "found \\elseif without matching start command");
                                           }
-                                          else if (yyextra->guards.top().hasElse())
+                                          else if (yyextra->guards->top().hasElse())
                                           {
                                             warn(yyextra->fileName,yyextra->lineNr,
                                                 "found \\elseif command after \\else command was given in \\if construct");
                                             yyextra->guardType = Guard_ElseIf;
                                             yyextra->spaceBeforeIf = yyextra->spaceBeforeCmd;
-                                            yyextra->guards.top().setEnabled(false);
+                                            yyextra->guards->top().setEnabled(false);
                                             BEGIN( GuardParam );
                                           }
                                           else
                                           {
                                             yyextra->guardType = Guard_ElseIf;
                                             yyextra->spaceBeforeIf = yyextra->spaceBeforeCmd;
-                                            yyextra->guards.top().setEnabled(false);
+                                            yyextra->guards->top().setEnabled(false);
                                             BEGIN( GuardParam );
                                           }
                                         }
@@ -2523,8 +2503,8 @@ STopt  [^\n@\\]*
   /* ----- handle argument of ingroup command ------- */
 
 <InGroupParam>{LABELID}                 { // group id
-                                          yyextra->current->groups.push_back(
-                                             Grouping(QCString(yytext), Grouping::GROUPING_INGROUP)
+                                          yyextra->current->groups.emplace_back(
+                                             QCString(yytext), Grouping::GROUPING_INGROUP
                                           );
                                           yyextra->inGroupParamFound=TRUE;
                                         }
@@ -2617,8 +2597,8 @@ STopt  [^\n@\\]*
   /* ----- handle argument of inherit command ------- */
 
 <InheritParam>({ID}("::"|"."))*{ID}     { // found argument
-                                          yyextra->current->extends.push_back(
-                                            BaseInfo(removeRedundantWhiteSpace(QCString(yytext)),Protection::Public,Specifier::Normal)
+                                          yyextra->current->extends.emplace_back(
+                                            removeRedundantWhiteSpace(QCString(yytext)),Protection::Public,Specifier::Normal
                                           );
                                           BEGIN( Comment );
                                         }
@@ -2640,8 +2620,8 @@ STopt  [^\n@\\]*
   /* ----- handle argument of extends and implements commands ------- */
 
 <ExtendsParam>({ID}("::"|"."))*{ID}     { // found argument
-                                          yyextra->current->extends.push_back(
-                                            BaseInfo(removeRedundantWhiteSpace(QCString(yytext)),Protection::Public,Specifier::Normal)
+                                          yyextra->current->extends.emplace_back(
+                                            removeRedundantWhiteSpace(QCString(yytext)),Protection::Public,Specifier::Normal
                                           );
                                           BEGIN( Comment );
                                         }
@@ -3486,14 +3466,14 @@ static bool handleIf(yyscan_t yyscanner,const QCString &, const StringVector &)
   struct yyguts_t *yyg = (struct yyguts_t*)yyscanner;
   yyextra->guardType = Guard_If;
   yyextra->spaceBeforeIf = yyextra->spaceBeforeCmd;
-  if (yyextra->guards.empty())
+  if (yyextra->guards->empty())
   {
-    yyextra->guards.push(GuardedSection(true));
+    yyextra->guards->emplace(true);
   }
   else
   {
-    bool enabled  = yyextra->guards.top().isEnabled();
-    yyextra->guards.push(GuardedSection(enabled));
+    bool enabled  = yyextra->guards->top().isEnabled();
+    yyextra->guards->emplace(enabled);
   }
   BEGIN(GuardParam);
   return FALSE;
@@ -3504,14 +3484,14 @@ static bool handleIfNot(yyscan_t yyscanner,const QCString &, const StringVector 
   struct yyguts_t *yyg = (struct yyguts_t*)yyscanner;
   yyextra->guardType = Guard_IfNot;
   yyextra->spaceBeforeIf = yyextra->spaceBeforeCmd;
-  if (yyextra->guards.empty())
+  if (yyextra->guards->empty())
   {
-    yyextra->guards.push(GuardedSection(true));
+    yyextra->guards->emplace(true);
   }
   else
   {
-    bool enabled  = yyextra->guards.top().isEnabled();
-    yyextra->guards.push(GuardedSection(enabled));
+    bool enabled  = yyextra->guards->top().isEnabled();
+    yyextra->guards->emplace(enabled);
   }
   BEGIN(GuardParam);
   return FALSE;
@@ -3520,25 +3500,25 @@ static bool handleIfNot(yyscan_t yyscanner,const QCString &, const StringVector 
 static bool handleElseIf(yyscan_t yyscanner,const QCString &, const StringVector &)
 {
   struct yyguts_t *yyg = (struct yyguts_t*)yyscanner;
-  if (yyextra->guards.empty())
+  if (yyextra->guards->empty())
   {
     warn(yyextra->fileName,yyextra->lineNr,
         "found \\elseif without matching start command");
   }
-  else if (yyextra->guards.top().hasElse())
+  else if (yyextra->guards->top().hasElse())
   {
     warn(yyextra->fileName,yyextra->lineNr,
         "found \\elseif command after \\else command was given in \\if construct");
     yyextra->guardType = Guard_ElseIf;
     yyextra->spaceBeforeIf = yyextra->spaceBeforeCmd;
-    yyextra->guards.top().setEnabled(false);
+    yyextra->guards->top().setEnabled(false);
     BEGIN(GuardParam);
   }
   else
   {
     yyextra->guardType = Guard_ElseIf;
     yyextra->spaceBeforeIf = yyextra->spaceBeforeCmd;
-    yyextra->guards.top().setEnabled(false);
+    yyextra->guards->top().setEnabled(false);
     BEGIN(GuardParam);
   }
   return FALSE;
@@ -3547,31 +3527,31 @@ static bool handleElseIf(yyscan_t yyscanner,const QCString &, const StringVector
 static bool handleElse(yyscan_t yyscanner,const QCString &, const StringVector &)
 {
   struct yyguts_t *yyg = (struct yyguts_t*)yyscanner;
-  if (yyextra->guards.empty())
+  if (yyextra->guards->empty())
   {
     warn(yyextra->fileName,yyextra->lineNr,
         "found \\else without matching start command");
   }
-  else if (yyextra->guards.top().hasElse())
+  else if (yyextra->guards->top().hasElse())
   {
     warn(yyextra->fileName,yyextra->lineNr,
         "found multiple \\else commands in same \\if construct");
-    yyextra->guards.top().setEnabled(false);
-    yyextra->guards.top().setElse();
+    yyextra->guards->top().setEnabled(false);
+    yyextra->guards->top().setElse();
     BEGIN( SkipGuardedSection );
   }
   else
   {
-    yyextra->guards.top().setElse();
+    yyextra->guards->top().setElse();
     yyextra->spaceBeforeIf = yyextra->spaceBeforeCmd;
-    if (yyextra->guards.top().isEnabledFound())
+    if (yyextra->guards->top().isEnabledFound())
     {
-      yyextra->guards.top().setEnabled(false);
+      yyextra->guards->top().setEnabled(false);
       BEGIN( SkipGuardedSection );
     }
     else
     {
-      yyextra->guards.top().setEnabled(true);
+      yyextra->guards->top().setEnabled(true);
       BEGIN( GuardParamEnd );
     }
   }
@@ -3581,27 +3561,27 @@ static bool handleElse(yyscan_t yyscanner,const QCString &, const StringVector &
 static bool handleEndIf(yyscan_t yyscanner,const QCString &, const StringVector &)
 {
   struct yyguts_t *yyg = (struct yyguts_t*)yyscanner;
-  if (yyextra->guards.empty())
+  if (yyextra->guards->empty())
   {
     warn(yyextra->fileName,yyextra->lineNr,
         "found \\endif without matching start command");
   }
   else
   {
-    yyextra->guards.pop();
+    yyextra->guards->pop();
   }
   if (!yyextra->spaceBeforeCmd.isEmpty())
   {
     addOutput(yyscanner,yyextra->spaceBeforeCmd);
     yyextra->spaceBeforeCmd.clear();
   }
-  if (yyextra->guards.empty())
+  if (yyextra->guards->empty())
   {
     BEGIN( GuardParamEnd );
   }
   else
   {
-    if (yyextra->guards.top().isEnabled())
+    if (yyextra->guards->top().isEnabled())
     {
       BEGIN( GuardParamEnd );
     }
@@ -3923,11 +3903,11 @@ static bool handleToc(yyscan_t yyscanner,const QCString &, const StringVector &o
     for (const auto &opt_ : optList)
     {
       QCString opt = QCString(opt_).stripWhiteSpace().lower();
-      char dum;
       int level = SectionType::MaxLevel;
       int i = opt.find(':');
       if (i>0)  // found ':' but not on position 0 what would mean just a level
       {
+        char dum=0;
         if (sscanf(opt.right(opt.length() - i - 1).data(),"%d%c",&level,&dum) != 1)
         {
           warn(yyextra->fileName,yyextra->lineNr,"Unknown option:level specified with \\tableofcontents: '%s'", qPrint(QCString(opt_).stripWhiteSpace()));
@@ -4283,10 +4263,9 @@ static void stripTrailingWhiteSpace(QCString &s)
 {
   size_t len = s.length();
   int i = (int)len-1;
-  char c;
   while (i>=0)
   {
-    c = s.at(i);
+    char c = s.at(i);
     if (c==' ' || c=='\t' || c=='\r') // normal whitespace
     {
       i--;
@@ -4617,7 +4596,8 @@ bool CommentScanner::parseCommentBlock(/* in */     OutlineParserInterface *pars
                        /* in,out */ Protection &prot,
                        /* in,out */ int &position,
                        /* out */    bool &newEntryNeeded,
-                       /* in */     bool markdownSupport
+                       /* in */     bool markdownSupport,
+                       /* inout */  GuardedSectionStack *guards
                       )
 {
   AUTO_TRACE("comment='{}' fileName={} lineNr={} isBrief={} isAutoBriefOn={} inInbody={}"
@@ -4627,7 +4607,7 @@ bool CommentScanner::parseCommentBlock(/* in */     OutlineParserInterface *pars
   struct yyguts_t *yyg = (struct yyguts_t*)yyscanner;
 
   initParser(yyscanner);
-  yyextra->guards = std::stack<GuardedSection>();
+  yyextra->guards = guards;
   yyextra->langParser     = parser;
   yyextra->current        = curEntry;
   yyextra->current->docLine = (lineNr > 1 ? lineNr : 1);
@@ -4657,7 +4637,7 @@ bool CommentScanner::parseCommentBlock(/* in */     OutlineParserInterface *pars
   yyextra->spaceBeforeCmd.clear();
   yyextra->spaceBeforeIf.clear();
 
-  DebugLex debugLex(Debug::Lex_commentscan, __FILE__, !fileName.isEmpty() ? qPrint(fileName): NULL);
+  DebugLex debugLex(Debug::Lex_commentscan, __FILE__, !fileName.isEmpty() ? qPrint(fileName): nullptr);
   if (!yyextra->current->inbodyDocs.isEmpty() && isInbody) // separate in body fragments
   {
     char cmd[30];
@@ -4669,7 +4649,7 @@ bool CommentScanner::parseCommentBlock(/* in */     OutlineParserInterface *pars
                "input=[\n%s]\n",qPrint(fileName),lineNr,qPrint(yyextra->inputString)
               );
 
-  commentscanYYrestart( 0, yyscanner );
+  commentscanYYrestart( nullptr, yyscanner );
   BEGIN( Comment );
   commentscanYYlex(yyscanner);
   setOutput(yyscanner, OutputDoc );
@@ -4677,11 +4657,6 @@ bool CommentScanner::parseCommentBlock(/* in */     OutlineParserInterface *pars
   if (YY_START==OverloadParam) // comment ended with \overload
   {
     addOutput(yyscanner,getOverloadDocs());
-  }
-
-  if (!yyextra->guards.empty())
-  {
-    warn(yyextra->fileName,yyextra->lineNr,"Documentation block ended in the middle of a conditional section!");
   }
 
   if (yyextra->insideParBlock)
@@ -4724,6 +4699,11 @@ bool CommentScanner::parseCommentBlock(/* in */     OutlineParserInterface *pars
   // were this happens
   if (yyextra->parseMore && position==yyextra->inputPosition) yyextra->parseMore=FALSE;
 
+  if (!yyextra->parseMore && !yyextra->guards->empty())
+  {
+    warn(yyextra->fileName,yyextra->lineNr,"Documentation block ended in the middle of a conditional section!");
+  }
+
   if (yyextra->parseMore) position=yyextra->inputPosition; else position=0;
 
   lineNr = yyextra->lineNr;
@@ -4742,7 +4722,7 @@ static void handleGuard(yyscan_t yyscanner,const QCString &expr)
   {
     sectionEnabled=prs.parse(yyextra->fileName,yyextra->lineNr,expr.stripWhiteSpace());
   }
-  bool parentEnabled = yyextra->guards.top().parentVisible();
+  bool parentEnabled = yyextra->guards->top().parentVisible();
   if (parentEnabled)
   {
     if (
@@ -4751,26 +4731,26 @@ static void handleGuard(yyscan_t yyscanner,const QCString &expr)
        ) // section is visible
     {
 
-      yyextra->guards.top().setEnabled(true);
-      yyextra->guards.top().setEnabledFound();
+      yyextra->guards->top().setEnabled(true);
+      yyextra->guards->top().setEnabledFound();
       BEGIN( GuardParamEnd );
     }
     else if (yyextra->guardType==Guard_ElseIf)
     {
-      if (yyextra->guards.top().isEnabledFound())
+      if (yyextra->guards->top().isEnabledFound())
       {
-        yyextra->guards.top().setEnabled(false);
+        yyextra->guards->top().setEnabled(false);
         BEGIN( SkipGuardedSection );
       }
       else if (sectionEnabled)
       {
-        yyextra->guards.top().setEnabled(true);
-        yyextra->guards.top().setEnabledFound();
+        yyextra->guards->top().setEnabled(true);
+        yyextra->guards->top().setEnabledFound();
         BEGIN( GuardParamEnd );
       }
       else
       {
-        yyextra->guards.top().setEnabled(false);
+        yyextra->guards->top().setEnabled(false);
         BEGIN( SkipGuardedSection );
       }
     }

@@ -91,6 +91,11 @@ class TranslatorPersian : public TranslatorAdapter_1_7_5
       return "";
     }
 
+    QCString latexCommandName() override
+    {
+      return p_latexCommandName("xelatex");
+    }
+
     QCString trISOLang() override
     {
       return "fa";
@@ -650,9 +655,8 @@ class TranslatorPersian : public TranslatorAdapter_1_7_5
     QCString trWriteList(int numEntries) override
     {
       QCString result;
-      int i;
       // the inherits list contain `numEntries' classes
-      for (i=0;i<numEntries;i++)
+      for (int i=0;i<numEntries;i++)
       {
         // use generateMarker to generate placeholders for the class links!
         result+=generateMarker(i); // generate marker for entry i in the list
@@ -1668,9 +1672,7 @@ class TranslatorPersian : public TranslatorAdapter_1_7_5
      */
     QCString trType(bool first_capital, bool singular) override
     {
-      QCString result((first_capital ? "Type" : "type"));
-      if (!singular)  result+="s";
-      return result;
+      return createNoun(first_capital, singular, "type", "s");
     }
     /*! This is used for translation of the word that will possibly
      *  be followed by a single name or by a list of names

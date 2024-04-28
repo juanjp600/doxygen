@@ -411,29 +411,15 @@ const Definition *SymbolResolver::Private::getResolvedSymbolRec(
     return nullptr; // empty name
   }
 
-  auto &range = Doxygen::symbolMap->find(name);
+  int i=0;
+  const auto &range1 = Doxygen::symbolMap->find(name);
+  const auto &range  = (range1.empty() && (i=name.find('<'))!=-1) ? Doxygen::symbolMap->find(name.left(i)) : range1;
   if (range.empty())
   {
-    int i;
-    if (insideCode && (i=name.find('<'))!=-1)
-    {
-      range = Doxygen::symbolMap->find(name.left(i));
-      if (range.empty())
-      {
-        AUTO_TRACE_ADD("no symbols (including unspecialized)");
-        return nullptr;
-      }
-    }
-    else
-    {
-      AUTO_TRACE_ADD("no symbols");
-      return nullptr;
-    }
+    AUTO_TRACE_ADD("no symbols (including unspecialized)");
+    return nullptr;
   }
-  else
-  {
-    AUTO_TRACE_ADD("{} candidates",range.size());
-  }
+  AUTO_TRACE_ADD("{} -> {} candidates",name,range.size());
 
   bool hasUsingStatements =
     (m_fileScope && (!m_fileScope->getUsedNamespaces().empty() ||
@@ -1167,10 +1153,8 @@ const Definition *SymbolResolver::Private::followPath(VisitedKeys &visitedKeys,
                                                       const Definition *start,const QCString &path)
 {
   AUTO_TRACE("start={},path={}",start?start->name():QCString(), path);
-  int is,ps;
-  int l;
+  int is=0,ps=0,l=0;
   const Definition *current=start;
-  ps=0;
   // for each part of the explicit scope
   while ((is=getScopeFragment(path,ps,&l))!=-1)
   {

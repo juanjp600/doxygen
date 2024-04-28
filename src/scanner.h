@@ -30,13 +30,17 @@ class COutlineParser : public OutlineParserInterface
 {
   public:
     COutlineParser();
-    virtual ~COutlineParser();
+    COutlineParser(const COutlineParser&) = delete;
+    COutlineParser& operator=(COutlineParser&) = delete;
+    COutlineParser(COutlineParser&&) = delete;
+    COutlineParser& operator=(COutlineParser&&) = delete;
+    ~COutlineParser() override;
     void parseTextInput(const QCString &fileName,
                     const char *fileBuf,
                     const std::shared_ptr<Entry> &root,
-                    ClangTUParser *clangParser);
-    bool needsPreprocessing(const QCString &extension) const;
-    void parsePrototype(const QCString &text);
+                    ClangTUParser *clangParser) override;
+    bool needsPreprocessing(const QCString &extension) const override;
+    void parsePrototype(const QCString &text) override;
     OUTLINE_PARSER_REJECT_BINARY;
   private:
     struct Private;

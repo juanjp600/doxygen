@@ -58,6 +58,8 @@ class MemberDefImpl : public DefinitionMixin<MemberDefMutable>
               const QCString &excp,Protection prot,Specifier virt,bool stat,
               Relationship related,MemberType t,const ArgumentList &tal,
               const ArgumentList &al,const QCString &metaData);
+   ~MemberDefImpl() override = default;
+    NON_COPYABLE(MemberDefImpl)
 
     DefType definitionType() const override        { return TypeMember; }
           MemberDef *resolveAlias() override       { return this; }
@@ -373,10 +375,6 @@ class MemberDefImpl : public DefinitionMixin<MemberDefMutable>
     bool _hasVisibleCallerGraph() const;
     bool _isAnonymousBitField() const;
 
-    // disable copying of member defs
-    MemberDefImpl(const MemberDefImpl &);
-    MemberDefImpl &operator=(const MemberDefImpl &);
-
 
     void init(Definition *def,const QCString &t,const QCString &a,const QCString &e,
               Protection p,Specifier v,bool s,Relationship r,
@@ -527,6 +525,8 @@ class MemberDefAliasImpl : public DefinitionAliasMixin<MemberDef>
     MemberDefAliasImpl(const Definition *newScope,const MemberDef *md)
     : DefinitionAliasMixin(newScope,md), m_memberGroup(nullptr) { init(); }
     ~MemberDefAliasImpl() override { deinit(); }
+    NON_COPYABLE(MemberDefAliasImpl)
+
     DefType definitionType() const override { return TypeMember; }
 
     const MemberDef *getMdAlias() const            { return toMemberDef(getAlias()); }
@@ -962,7 +962,7 @@ static QCString addTemplateNames(const QCString &s,const QCString &n,const QCStr
 {
   QCString result;
   QCString clRealName=n;
-  int p=0,i;
+  int p=0,i=0;
   if ((i=clRealName.find('<'))!=-1)
   {
     clRealName=clRealName.left(i); // strip template specialization
@@ -1427,113 +1427,100 @@ MemberDefImpl::MemberDefImpl(const QCString &df,int dl,int dc,
   m_isDestructorCached  = 0;
 }
 
-MemberDefImpl::MemberDefImpl(const MemberDefImpl &md) : DefinitionMixin(md)
-{
-  m_classDef                       = md.m_classDef                       ;
-  m_fileDef                        = md.m_fileDef                        ;
-  m_moduleDef                      = md.m_moduleDef                      ;
-  m_nspace                         = md.m_nspace                         ;
-  m_enumScope                      = md.m_enumScope                      ;
-  m_livesInsideEnum                = md.m_livesInsideEnum                ;
-  m_annEnumType                    = md.m_annEnumType                    ;
-  m_enumFields                     = md.m_enumFields                     ;
-  m_redefines                      = md.m_redefines                      ;
-  m_redefinedBy                    = md.m_redefinedBy                    ;
-  m_memDef                         = md.m_memDef                         ;
-  m_memDec                         = md.m_memDec                         ;
-  m_relatedAlso                    = md.m_relatedAlso                    ;
-  m_examples                       = md.m_examples                       ;
-  m_type                           = md.m_type                           ;
-  m_accessorType                   = md.m_accessorType                   ;
-  m_accessorClass                  = md.m_accessorClass                  ;
-  m_args                           = md.m_args                           ;
-  m_def                            = md.m_def                            ;
-  m_anc                            = md.m_anc                            ;
-  m_virt                           = md.m_virt                           ;
-  m_prot                           = md.m_prot                           ;
-  m_decl                           = md.m_decl                           ;
-  m_bitfields                      = md.m_bitfields                      ;
-  m_read                           = md.m_read                           ;
-  m_write                          = md.m_write                          ;
-  m_exception                      = md.m_exception                      ;
-  m_initializer                    = md.m_initializer                    ;
-  m_extraTypeChars                 = md.m_extraTypeChars                 ;
-  m_enumBaseType                   = md.m_enumBaseType                   ;
-  m_requiresClause                 = md.m_requiresClause                 ;
-  m_initLines                      = md.m_initLines                      ;
-  m_memSpec                        = md.m_memSpec                        ;
-  m_vhdlSpec                       = md.m_vhdlSpec                       ;
-  m_mtype                          = md.m_mtype                          ;
-  m_maxInitLines                   = md.m_maxInitLines                   ;
-  m_userInitLines                  = md.m_userInitLines                  ;
-  m_annMemb                        = md.m_annMemb                        ;
-  m_defArgList                     = md.m_defArgList                     ;
-  m_declArgList                    = md.m_declArgList                    ;
-  m_tArgList                       = md.m_tArgList                       ;
-  m_typeConstraints                = md.m_typeConstraints                ;
-  m_templateMaster                 = md.m_templateMaster                 ;
-  m_formalTemplateArguments        = md.m_formalTemplateArguments        ;
-  m_defTmpArgLists                 = md.m_defTmpArgLists                 ;
-  m_metaData                       = md.m_metaData                       ;
-  m_cachedAnonymousType            = md.m_cachedAnonymousType            ;
-  m_sectionMap                     = md.m_sectionMap                     ;
-  m_groupAlias                     = md.m_groupAlias                     ;
-  m_grpId                          = md.m_grpId                          ;
-  m_memberGroup                    = md.m_memberGroup                    ;
-  m_group                          = md.m_group                          ;
-  m_grouppri                       = md.m_grouppri                       ;
-  m_groupFileName                  = md.m_groupFileName                  ;
-  m_groupStartLine                 = md.m_groupStartLine                 ;
-  m_groupMember                    = md.m_groupMember                    ;
-  m_isTypedefValCached             = md.m_isTypedefValCached             ;
-  m_cachedTypedefValue             = md.m_cachedTypedefValue             ;
-  m_cachedTypedefTemplSpec         = md.m_cachedTypedefTemplSpec         ;
-  m_cachedResolvedType             = md.m_cachedResolvedType             ;
-  m_docProvider                    = md.m_docProvider                    ;
-  m_explicitOutputFileBase         = md.m_explicitOutputFileBase         ;
-  m_qualifiers                     = md.m_qualifiers                     ;
-  m_implOnly                       = md.m_implOnly                       ;
-  m_hasDocumentedParams            = md.m_hasDocumentedParams            ;
-  m_hasDocumentedReturnType        = md.m_hasDocumentedReturnType        ;
-  m_isDMember                      = md.m_isDMember                      ;
-  m_related                        = md.m_related                        ;
-  m_stat                           = md.m_stat                           ;
-  m_proto                          = md.m_proto                          ;
-  m_docEnumValues                  = md.m_docEnumValues                  ;
-  m_annScope                       = md.m_annScope                       ;
-  m_hasDetailedDescriptionCached   = md.m_hasDetailedDescriptionCached   ;
-  m_detailedDescriptionCachedValue = md.m_detailedDescriptionCachedValue ;
-  m_hasCallGraph                   = md.m_hasCallGraph                   ;
-  m_hasCallerGraph                 = md.m_hasCallerGraph                 ;
-  m_hasReferencedByRelation        = md.m_hasReferencedByRelation        ;
-  m_hasReferencesRelation          = md.m_hasReferencesRelation          ;
-  m_hasInlineSource                = md.m_hasInlineSource                ;
-  m_explExt                        = md.m_explExt                        ;
-  m_tspec                          = md.m_tspec                          ;
-  m_groupHasDocs                   = md.m_groupHasDocs                   ;
-  m_docsForDefinition              = md.m_docsForDefinition              ;
-  m_category                       = md.m_category                       ;
-  m_categoryRelation               = md.m_categoryRelation               ;
-  m_declFileName                   = md.m_declFileName                   ;
-  m_declLine                       = md.m_declLine                       ;
-  m_declColumn                     = md.m_declColumn                     ;
-  m_numberOfFlowKW                 = md.m_numberOfFlowKW                 ;
-
-  m_isLinkableCached    = 0;
-  m_isConstructorCached = 0;
-  m_isDestructorCached  = 0;
-}
-
 std::unique_ptr<MemberDef> MemberDefImpl::deepCopy() const
 {
-  //MemberDef *result = new MemberDef(getDefFileName(),getDefLine(),name());
-  std::unique_ptr<MemberDefImpl> result(new MemberDefImpl(*this));
+  std::unique_ptr<MemberDefImpl> result(new MemberDefImpl(
+        getDefFileName(),getDefLine(),getDefColumn(),m_type,localName(),m_args,m_exception,
+        m_prot,m_virt,m_stat,m_related,m_mtype,m_tArgList,m_defArgList,m_metaData));
   // first copy everything by reference
-  result->m_defArgList = m_defArgList;
-  result->m_tArgList = m_tArgList;
-  result->m_typeConstraints = m_typeConstraints;
+  result->m_typeConstraints                = m_typeConstraints                ;
+  result->m_declArgList                    = m_declArgList                    ;
+  result->m_classDef                       = m_classDef                       ;
+  result->m_fileDef                        = m_fileDef                        ;
+  result->m_moduleDef                      = m_moduleDef                      ;
+  result->m_nspace                         = m_nspace                         ;
+  result->m_enumScope                      = m_enumScope                      ;
+  result->m_livesInsideEnum                = m_livesInsideEnum                ;
+  result->m_annEnumType                    = m_annEnumType                    ;
+  result->m_enumFields                     = m_enumFields                     ;
+  result->m_redefines                      = m_redefines                      ;
+  result->m_redefinedBy                    = m_redefinedBy                    ;
+  result->m_memDef                         = m_memDef                         ;
+  result->m_memDec                         = m_memDec                         ;
+  result->m_relatedAlso                    = m_relatedAlso                    ;
+  result->m_examples                       = m_examples                       ;
+  result->m_accessorType                   = m_accessorType                   ;
+  result->m_accessorClass                  = m_accessorClass                  ;
+  result->m_def                            = m_def                            ;
+  result->m_anc                            = m_anc                            ;
+  result->m_decl                           = m_decl                           ;
+  result->m_bitfields                      = m_bitfields                      ;
+  result->m_read                           = m_read                           ;
+  result->m_write                          = m_write                          ;
+  result->m_exception                      = m_exception                      ;
+  result->m_initializer                    = m_initializer                    ;
+  result->m_extraTypeChars                 = m_extraTypeChars                 ;
+  result->m_enumBaseType                   = m_enumBaseType                   ;
+  result->m_requiresClause                 = m_requiresClause                 ;
+  result->m_initLines                      = m_initLines                      ;
+  result->m_memSpec                        = m_memSpec                        ;
+  result->m_vhdlSpec                       = m_vhdlSpec                       ;
+  result->m_maxInitLines                   = m_maxInitLines                   ;
+  result->m_userInitLines                  = m_userInitLines                  ;
+  result->m_annMemb                        = m_annMemb                        ;
+  result->m_defArgList                     = m_defArgList                     ;
+  result->m_declArgList                    = m_declArgList                    ;
+  result->m_tArgList                       = m_tArgList                       ;
+  result->m_typeConstraints                = m_typeConstraints                ;
+  result->m_templateMaster                 = m_templateMaster                 ;
+  result->m_formalTemplateArguments        = m_formalTemplateArguments        ;
+  result->m_defTmpArgLists                 = m_defTmpArgLists                 ;
+  result->m_cachedAnonymousType            = m_cachedAnonymousType            ;
+  result->m_sectionMap                     = m_sectionMap                     ;
+  result->m_groupAlias                     = m_groupAlias                     ;
+  result->m_grpId                          = m_grpId                          ;
+  result->m_memberGroup                    = m_memberGroup                    ;
+  result->m_group                          = m_group                          ;
+  result->m_grouppri                       = m_grouppri                       ;
+  result->m_groupFileName                  = m_groupFileName                  ;
+  result->m_groupStartLine                 = m_groupStartLine                 ;
+  result->m_groupMember                    = m_groupMember                    ;
+  result->m_isTypedefValCached             = m_isTypedefValCached             ;
+  result->m_cachedTypedefValue             = m_cachedTypedefValue             ;
+  result->m_cachedTypedefTemplSpec         = m_cachedTypedefTemplSpec         ;
+  result->m_cachedResolvedType             = m_cachedResolvedType             ;
+  result->m_docProvider                    = m_docProvider                    ;
+  result->m_explicitOutputFileBase         = m_explicitOutputFileBase         ;
+  result->m_qualifiers                     = m_qualifiers                     ;
+  result->m_implOnly                       = m_implOnly                       ;
+  result->m_hasDocumentedParams            = m_hasDocumentedParams            ;
+  result->m_hasDocumentedReturnType        = m_hasDocumentedReturnType        ;
+  result->m_isDMember                      = m_isDMember                      ;
+  result->m_proto                          = m_proto                          ;
+  result->m_docEnumValues                  = m_docEnumValues                  ;
+  result->m_annScope                       = m_annScope                       ;
+  result->m_hasDetailedDescriptionCached   = m_hasDetailedDescriptionCached   ;
+  result->m_detailedDescriptionCachedValue = m_detailedDescriptionCachedValue ;
+  result->m_hasCallGraph                   = m_hasCallGraph                   ;
+  result->m_hasCallerGraph                 = m_hasCallerGraph                 ;
+  result->m_hasReferencedByRelation        = m_hasReferencedByRelation        ;
+  result->m_hasReferencesRelation          = m_hasReferencesRelation          ;
+  result->m_hasInlineSource                = m_hasInlineSource                ;
+  result->m_explExt                        = m_explExt                        ;
+  result->m_tspec                          = m_tspec                          ;
+  result->m_groupHasDocs                   = m_groupHasDocs                   ;
+  result->m_docsForDefinition              = m_docsForDefinition              ;
+  result->m_category                       = m_category                       ;
+  result->m_categoryRelation               = m_categoryRelation               ;
+  result->m_declFileName                   = m_declFileName                   ;
+  result->m_declLine                       = m_declLine                       ;
+  result->m_declColumn                     = m_declColumn                     ;
+  result->m_numberOfFlowKW                 = m_numberOfFlowKW                 ;
   result->setDefinitionTemplateParameterLists(m_defTmpArgLists);
-  result->m_declArgList = m_declArgList;
+
+  result->m_isLinkableCached    = 0;
+  result->m_isConstructorCached = 0;
+  result->m_isDestructorCached  = 0;
   return result;
 }
 
@@ -2270,8 +2257,7 @@ void MemberDefImpl::writeDeclaration(OutputList &ol,
 
   if (annoClassDef || m_annMemb)
   {
-    int j;
-    for (j=0;j<indentLevel;j++)
+    for (int j=0;j<indentLevel;j++)
     {
       ol.writeNonBreakableSpace(3);
     }
@@ -2318,8 +2304,7 @@ void MemberDefImpl::writeDeclaration(OutputList &ol,
       //printf(">>>>>>>>>>>>>> startMemberItem(2)\n");
       anonType = OutputGenerator::MemberItemType::AnonymousEnd;
       ol.startMemberItem(anchor(),anonType,inheritId);
-      int j;
-      for (j=0;j< indentLevel;j++)
+      for (int j=0;j< indentLevel;j++)
       {
         ol.writeNonBreakableSpace(3);
       }
@@ -2527,14 +2512,14 @@ void MemberDefImpl::writeDeclaration(OutputList &ol,
       ol.docify(" [");
       StringVector sl;
 
-      if (isGettable())             sl.push_back("get");
-      if (isProtectedGettable())    sl.push_back("protected get");
-      if (isSettable())             sl.push_back("set");
-      if (isProtectedSettable())    sl.push_back("protected set");
+      if (isGettable())             sl.emplace_back("get");
+      if (isProtectedGettable())    sl.emplace_back("protected get");
+      if (isSettable())             sl.emplace_back("set");
+      if (isProtectedSettable())    sl.emplace_back("protected set");
       if (extractPrivate)
       {
-        if (isPrivateGettable())    sl.push_back("private get");
-        if (isPrivateSettable())    sl.push_back("private set");
+        if (isPrivateGettable())    sl.emplace_back("private get");
+        if (isPrivateSettable())    sl.emplace_back("private set");
       }
       bool first=true;
       for (const auto &s : sl)
@@ -2556,9 +2541,9 @@ void MemberDefImpl::writeDeclaration(OutputList &ol,
       ol.startTypewriter();
       ol.docify(" [");
       StringVector sl;
-      if (isAddable())   sl.push_back("add");
-      if (isRemovable()) sl.push_back("remove");
-      if (isRaisable())  sl.push_back("raise");
+      if (isAddable())   sl.emplace_back("add");
+      if (isRemovable()) sl.emplace_back("remove");
+      if (isRaisable())  sl.emplace_back("raise");
       bool first=true;
       for (const auto &s : sl)
       {
@@ -2790,82 +2775,82 @@ StringVector MemberDefImpl::getLabels(const Definition *container) const
     }
     else
     {
-      if (isFriend())                                   sl.push_back("friend");
-      else if (isRelated())                             sl.push_back("related");
+      if (isFriend())                                   sl.emplace_back("friend");
+      else if (isRelated())                             sl.emplace_back("related");
       else
       {
-        if      (isExternal())                          sl.push_back("extern");
-        if      (inlineInfo && isInline())              sl.push_back("inline");
-        if      (isExplicit())                          sl.push_back("explicit");
-        if      (isMutable())                           sl.push_back("mutable");
-        if      (isStatic())                            sl.push_back("static");
-        if      (isGettable())                          sl.push_back("get");
-        if      (isProtectedGettable())                 sl.push_back("protected get");
-        if      (isSettable())                          sl.push_back("set");
-        if      (isProtectedSettable())                 sl.push_back("protected set");
+        if      (isExternal())                          sl.emplace_back("extern");
+        if      (inlineInfo && isInline())              sl.emplace_back("inline");
+        if      (isExplicit())                          sl.emplace_back("explicit");
+        if      (isMutable())                           sl.emplace_back("mutable");
+        if      (isStatic())                            sl.emplace_back("static");
+        if      (isGettable())                          sl.emplace_back("get");
+        if      (isProtectedGettable())                 sl.emplace_back("protected get");
+        if      (isSettable())                          sl.emplace_back("set");
+        if      (isProtectedSettable())                 sl.emplace_back("protected set");
         if (extractPrivate)
         {
-          if    (isPrivateGettable())                   sl.push_back("private get");
-          if    (isPrivateSettable())                   sl.push_back("private set");
+          if    (isPrivateGettable())                   sl.emplace_back("private get");
+          if    (isPrivateSettable())                   sl.emplace_back("private set");
         }
-        if      (isNoDiscard())                         sl.push_back("nodiscard");
-        if      (isConstExpr())                         sl.push_back("constexpr");
-        if      (isConstEval())                         sl.push_back("consteval");
-        if      (isConstInit())                         sl.push_back("constinit");
-        if      (isAddable())                           sl.push_back("add");
-        if      (!isUNOProperty() && isRemovable())     sl.push_back("remove");
-        if      (isRaisable())                          sl.push_back("raise");
-        if      (isReadable())                          sl.push_back("read");
-        if      (isWritable())                          sl.push_back("write");
-        if      (isFinal())                             sl.push_back("final");
-        if      (isAbstract())                          sl.push_back("abstract");
-        if      (isOverride())                          sl.push_back("override");
-        if      (isInitonly())                          sl.push_back("initonly");
-        if      (isSealed())                            sl.push_back("sealed");
-        if      (isNew())                               sl.push_back("new");
-        if      (isOptional())                          sl.push_back("optional");
-        if      (isRequired())                          sl.push_back("required");
-        if      (isExported())                          sl.push_back("export");
+        if      (isNoDiscard())                         sl.emplace_back("nodiscard");
+        if      (isConstExpr())                         sl.emplace_back("constexpr");
+        if      (isConstEval())                         sl.emplace_back("consteval");
+        if      (isConstInit())                         sl.emplace_back("constinit");
+        if      (isAddable())                           sl.emplace_back("add");
+        if      (!isUNOProperty() && isRemovable())     sl.emplace_back("remove");
+        if      (isRaisable())                          sl.emplace_back("raise");
+        if      (isReadable())                          sl.emplace_back("read");
+        if      (isWritable())                          sl.emplace_back("write");
+        if      (isFinal())                             sl.emplace_back("final");
+        if      (isAbstract())                          sl.emplace_back("abstract");
+        if      (isOverride())                          sl.emplace_back("override");
+        if      (isInitonly())                          sl.emplace_back("initonly");
+        if      (isSealed())                            sl.emplace_back("sealed");
+        if      (isNew())                               sl.emplace_back("new");
+        if      (isOptional())                          sl.emplace_back("optional");
+        if      (isRequired())                          sl.emplace_back("required");
+        if      (isExported())                          sl.emplace_back("export");
 
-        if      (isNonAtomic())                         sl.push_back("nonatomic");
-        else if (isObjCProperty())                      sl.push_back("atomic");
+        if      (isNonAtomic())                         sl.emplace_back("nonatomic");
+        else if (isObjCProperty())                      sl.emplace_back("atomic");
 
         // mutual exclusive Objective 2.0 property attributes
-        if      (isAssign())                            sl.push_back("assign");
-        else if (isCopy())                              sl.push_back("copy");
-        else if (isRetain())                            sl.push_back("retain");
-        else if (isWeak())                              sl.push_back("weak");
-        else if (lang!=SrcLangExt::CSharp && isStrong()) sl.push_back("strong");
-        else if (isUnretained())                        sl.push_back("unsafe_unretained");
+        if      (isAssign())                            sl.emplace_back("assign");
+        else if (isCopy())                              sl.emplace_back("copy");
+        else if (isRetain())                            sl.emplace_back("retain");
+        else if (isWeak())                              sl.emplace_back("weak");
+        else if (lang!=SrcLangExt::CSharp && isStrong()) sl.emplace_back("strong");
+        else if (isUnretained())                        sl.emplace_back("unsafe_unretained");
 
         if (!isObjCMethod())
         {
-          if      (protection()==Protection::Protected) sl.push_back("protected");
-          else if (protection()==Protection::Private)   sl.push_back("private");
-          else if (protection()==Protection::Package)   sl.push_back("package");
+          if      (protection()==Protection::Protected) sl.emplace_back("protected");
+          else if (protection()==Protection::Private)   sl.emplace_back("private");
+          else if (protection()==Protection::Package)   sl.emplace_back("package");
 
-          if      (lvirt==Specifier::Virtual)           sl.push_back("virtual");
-          else if (lvirt==Specifier::Pure)              sl.push_back("pure virtual");
-          if      (isSignal())                          sl.push_back("signal");
-          if      (isSlot())                            sl.push_back("slot");
-          if      (isDefault())                         sl.push_back("default");
-          if      (isDelete())                          sl.push_back("delete");
-          if      (isNoExcept())                        sl.push_back("noexcept");
-          if      (isAttribute())                       sl.push_back("attribute");
-          if      (isUNOProperty())                     sl.push_back("property");
-          if      (isReadonly())                        sl.push_back("readonly");
-          if      (isBound())                           sl.push_back("bound");
-          if      (isUNOProperty() && isRemovable())    sl.push_back("removable");
-          if      (isConstrained())                     sl.push_back("constrained");
-          if      (isTransient())                       sl.push_back("transient");
-          if      (isMaybeVoid())                       sl.push_back("maybevoid");
-          if      (isMaybeDefault())                    sl.push_back("maybedefault");
-          if      (isMaybeAmbiguous())                  sl.push_back("maybeambiguous");
-          if      (isPublished())                       sl.push_back("published"); // enum
+          if      (lvirt==Specifier::Virtual)           sl.emplace_back("virtual");
+          else if (lvirt==Specifier::Pure)              sl.emplace_back("pure virtual");
+          if      (isSignal())                          sl.emplace_back("signal");
+          if      (isSlot())                            sl.emplace_back("slot");
+          if      (isDefault())                         sl.emplace_back("default");
+          if      (isDelete())                          sl.emplace_back("delete");
+          if      (isNoExcept())                        sl.emplace_back("noexcept");
+          if      (isAttribute())                       sl.emplace_back("attribute");
+          if      (isUNOProperty())                     sl.emplace_back("property");
+          if      (isReadonly())                        sl.emplace_back("readonly");
+          if      (isBound())                           sl.emplace_back("bound");
+          if      (isUNOProperty() && isRemovable())    sl.emplace_back("removable");
+          if      (isConstrained())                     sl.emplace_back("constrained");
+          if      (isTransient())                       sl.emplace_back("transient");
+          if      (isMaybeVoid())                       sl.emplace_back("maybevoid");
+          if      (isMaybeDefault())                    sl.emplace_back("maybedefault");
+          if      (isMaybeAmbiguous())                  sl.emplace_back("maybeambiguous");
+          if      (isPublished())                       sl.emplace_back("published"); // enum
         }
         if (isObjCProperty() && isImplementation())
         {
-          sl.push_back("implementation");
+          sl.emplace_back("implementation");
         }
       }
       if (getClassDef() &&
@@ -2874,13 +2859,13 @@ StringVector MemberDefImpl::getLabels(const Definition *container) const
           !isRelated()
          )
       {
-        sl.push_back("inherited");
+        sl.emplace_back("inherited");
       }
     }
   }
   else if (isObjCMethod() && isImplementation())
   {
-    sl.push_back("implementation");
+    sl.emplace_back("implementation");
   }
 
   for (const auto &sx : m_qualifiers)
@@ -4342,7 +4327,7 @@ void MemberDefImpl::setNamespace(NamespaceDef *nd)
 std::unique_ptr<MemberDef> MemberDefImpl::createTemplateInstanceMember(
         const ArgumentList &formalArgs,const std::unique_ptr<ArgumentList> &actualArgs) const
 {
-  //printf("  Member %s %s %s\n",typeString(),qPrint(name()),argsString());
+  //printf("  Member %s %s %s\n",qPrint(typeString()),qPrint(name()),qPrint(argsString()));
   std::unique_ptr<ArgumentList> actualArgList = std::make_unique<ArgumentList>(m_defArgList);
   if (!m_defArgList.empty())
   {
@@ -4634,7 +4619,7 @@ bool MemberDefImpl::isConstructor() const
 
 void MemberDefImpl::_computeIsDestructor()
 {
-  bool isDestructor;
+  bool isDestructor = false;
   if (m_isDMember) // for D
   {
     isDestructor = name()=="~this";
@@ -4646,7 +4631,7 @@ void MemberDefImpl::_computeIsDestructor()
   else if (name()=="__del__" &&
            getLanguage()==SrcLangExt::Python) // for Python
   {
-    isDestructor=TRUE;
+    isDestructor = true;
   }
   else if (getLanguage()==SrcLangExt::Fortran) // for Fortran
   {

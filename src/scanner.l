@@ -5760,8 +5760,8 @@ NONLopt [^\n]*
                                             // there can be only one base class here
                                             if (!yyextra->baseName.isEmpty())
                                             {
-                                              yyextra->current->extends.push_back(
-                                                BaseInfo(yyextra->baseName,Protection::Public,Specifier::Normal));
+                                              yyextra->current->extends.emplace_back(
+                                                yyextra->baseName,Protection::Public,Specifier::Normal);
                                               yyextra->baseName.clear();
                                             }
                                             yyextra->current_root->moveToSubEntryAndRefresh( yyextra->current ) ;
@@ -6507,8 +6507,8 @@ NONLopt [^\n]*
                                           yyextra->current->name = removeRedundantWhiteSpace(yyextra->current->name);
                                           if (!yyextra->baseName.isEmpty())
                                           {
-                                            yyextra->current->extends.push_back(
-                                              BaseInfo(yyextra->baseName,yyextra->baseProt,yyextra->baseVirt)
+                                            yyextra->current->extends.emplace_back(
+                                              yyextra->baseName,yyextra->baseProt,yyextra->baseVirt
                                             );
                                           }
                                           if (yyextra->current->spec.isInterface() || yyextra->current->spec.isStruct() ||
@@ -6551,8 +6551,8 @@ NONLopt [^\n]*
                                           yyextra->current->bodyColumn = yyextra->yyColNr;
                                           yyextra->current->name = removeRedundantWhiteSpace(yyextra->current->name);
                                           if (!yyextra->baseName.isEmpty())
-                                            yyextra->current->extends.push_back(
-                                               BaseInfo(yyextra->baseName,yyextra->baseProt,yyextra->baseVirt)
+                                            yyextra->current->extends.emplace_back(
+                                               yyextra->baseName,yyextra->baseProt,yyextra->baseVirt
                                             );
                                           yyextra->curlyCount=0;
                                           if (yyextra->insideObjC)
@@ -6747,8 +6747,12 @@ NONLopt [^\n]*
                                           else if (yyextra->insideCS &&
                                               !yyextra->current->name.isEmpty() &&
                                               !yyextra->current->type.isEmpty())
-                                          {
-                                            if (containsWord(yyextra->current->type,"event")) // event
+                                          { 
+                                            if (yyextra->current->mtype == MethodTypes::Event)
+                                            {
+                                              yyextra->mtype = MethodTypes::Event;
+                                            }
+                                            else if (containsWord(yyextra->current->type,"event")) // event
                                             {
                                               yyextra->current->mtype = yyextra->mtype = MethodTypes::Event;
                                             }
@@ -7871,6 +7875,7 @@ static void handleCommentBlock(yyscan_t yyscanner,const QCString &doc,bool brief
 
   int position=0;
   bool needsEntry=FALSE;
+  GuardedSectionStack guards;
   Markdown markdown(yyextra->fileName,lineNr);
   QCString strippedDoc = stripIndentation(doc);
   QCString processedDoc = Config_getBool(MARKDOWN_SUPPORT) ? markdown.process(strippedDoc,lineNr) : strippedDoc;
@@ -7886,7 +7891,8 @@ static void handleCommentBlock(yyscan_t yyscanner,const QCString &doc,bool brief
         yyextra->protection,
         position,
         needsEntry,
-        Config_getBool(MARKDOWN_SUPPORT)
+        Config_getBool(MARKDOWN_SUPPORT),
+        &guards
         )
      )
   {
@@ -7935,6 +7941,7 @@ static void handleParametersCommentBlocks(yyscan_t yyscanner,ArgumentList &al)
 
       //printf("handleParametersCommentBlock [%s]\n",qPrint(doc));
       int lineNr = orgDocLine;
+      GuardedSectionStack guards;
       Markdown markdown(yyextra->fileName,lineNr);
       QCString strippedDoc = stripIndentation(a.docs);
       QCString processedDoc = Config_getBool(MARKDOWN_SUPPORT) ? markdown.process(strippedDoc,lineNr) : strippedDoc;
@@ -7950,7 +7957,8 @@ static void handleParametersCommentBlocks(yyscan_t yyscanner,ArgumentList &al)
              yyextra->protection,
              position,
              needsEntry,
-             Config_getBool(MARKDOWN_SUPPORT)
+             Config_getBool(MARKDOWN_SUPPORT),
+             &guards
             )
           )
       {
@@ -8108,7 +8116,7 @@ static void parseMain(yyscan_t yyscanner,
   yyextra->inputString = fileBuf;
   yyextra->inputPosition = 0;
   yyextra->column = 0;
-  scannerYYrestart(0,yyscanner);
+  scannerYYrestart(nullptr,yyscanner);
 
   //depthIf       = 0;
   yyextra->protection    = Protection::Public;
@@ -8208,7 +8216,7 @@ static void parsePrototype(yyscan_t yyscanner,const QCString &text)
 
   // save scanner state
   orgState = YY_CURRENT_BUFFER;
-  yy_switch_to_buffer(yy_create_buffer(0, YY_BUF_SIZE, yyscanner), yyscanner);
+  yy_switch_to_buffer(yy_create_buffer(nullptr, YY_BUF_SIZE, yyscanner), yyscanner);
   orgInputString = yyextra->inputString;
   orgInputPosition = yyextra->inputPosition;
 
@@ -8216,7 +8224,7 @@ static void parsePrototype(yyscan_t yyscanner,const QCString &text)
   yyextra->inputString = text.data();
   yyextra->inputPosition = 0;
   yyextra->column = 0;
-  scannerYYrestart(0, yyscanner);
+  scannerYYrestart(nullptr, yyscanner);
   BEGIN(Prototype);
   scannerYYlex(yyscanner);
   yyextra->lexInit=TRUE;

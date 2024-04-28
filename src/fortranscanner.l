@@ -697,7 +697,7 @@ abstract                                {
                                         }
 extends{ARGS}                           {
                                           QCString basename = extractFromParens(yytext).lower();
-                                          yyextra->current->extends.push_back(BaseInfo(basename, Protection::Public, Specifier::Normal));
+                                          yyextra->current->extends.emplace_back(basename, Protection::Public, Specifier::Normal);
                                         }
 public                                  {
                                           yyextra->current->protection = Protection::Public;
@@ -1701,7 +1701,7 @@ static inline int computeIndent(const char *s)
   int col=0;
   int tabSize=Config_getInt(TAB_SIZE);
   const char *p=s;
-  char c;
+  char c = 0;
   while ((c=*p++))
   {
     if (c=='\t') col+=tabSize-(col%tabSize);
@@ -1725,7 +1725,7 @@ static const CommentInPrepass *locatePrepassComment(yyscan_t yyscanner,int from,
       return &cip;
     }
   }
-  return 0;
+  return nullptr;
 }
 
 static void updateVariablePrepassComment(yyscan_t yyscanner,int from, int to)
@@ -1944,7 +1944,7 @@ const char* prepassFixedForm(const char* contents, int *hasContLine,int fixedCom
         if (hasContLine)
         {
            free(newContents);
-           return NULL;
+           return nullptr;
         }
         newContents[j]='\000';
         newContentsSize = (int)strlen(newContents);
@@ -2088,7 +2088,7 @@ const char* prepassFixedForm(const char* contents, int *hasContLine,int fixedCom
   if (hasContLine)
   {
     free(newContents);
-    return NULL;
+    return nullptr;
   }
 
   if (j==-1) // contents was empty
@@ -2393,7 +2393,7 @@ static Argument *findArgument(Entry* subprog, QCString name, bool byTypeName = F
       return &arg;
     }
   }
-  return 0;
+  return nullptr;
 }
 
 
@@ -2563,7 +2563,7 @@ static bool endScope(yyscan_t yyscanner,Entry *scope, bool isGlobalRoot)
   struct yyguts_t *yyg = (struct yyguts_t*)yyscanner;
   if (yyextra->global_scope == scope)
   {
-    yyextra->global_scope = 0;
+    yyextra->global_scope = nullptr;
     return TRUE;
   }
   if (yyextra->global_scope == INVALID_ENTRY)
@@ -2629,9 +2629,11 @@ static bool endScope(yyscan_t yyscanner,Entry *scope, bool isGlobalRoot)
         QCString name = ce->name.lower();
         int ii = name.findRev(":");
         if (ii != -1)
+        {
           name.remove(0, ii+1);
+        }
         Argument *arg = findArgument(scope->parent(), name);
-        if (arg != 0) 
+        if (arg)
         {
           // set type of dummy procedure argument to interface
           arg->type = "external " + ce->type + "(";
@@ -2651,7 +2653,7 @@ static bool endScope(yyscan_t yyscanner,Entry *scope, bool isGlobalRoot)
       // clear all yyextra->modifiers of the scope
       yyextra->modifiers.erase(scope);
       scope->parent()->removeSubEntry(scope);
-      scope = 0;
+      scope = nullptr;
       return TRUE;
     }
   }
@@ -3050,6 +3052,7 @@ static void handleCommentBlock(yyscan_t yyscanner,const QCString &doc,bool brief
   int position=0;
   bool needsEntry = FALSE;
   Markdown markdown(yyextra->fileName,lineNr);
+  GuardedSectionStack guards;
   QCString processedDoc = Config_getBool(MARKDOWN_SUPPORT) ? markdown.process(doc,lineNr) : doc;
   while (yyextra->commentScanner.parseCommentBlock(
         yyextra->thisParser,
@@ -3063,7 +3066,8 @@ static void handleCommentBlock(yyscan_t yyscanner,const QCString &doc,bool brief
         yyextra->defaultProtection,
         position,
         needsEntry,
-        Config_getBool(MARKDOWN_SUPPORT)
+        Config_getBool(MARKDOWN_SUPPORT),
+        &guards
         ))
   {
     DBG_CTX((stderr,"parseCommentBlock position=%d [%s]  needsEntry=%d\n",position,doc.data()+position,needsEntry));
@@ -3219,7 +3223,7 @@ static void parseMain(yyscan_t yyscanner, const QCString &fileName,const char *f
   char *tmpBuf = nullptr;
   initParser(yyscanner);
 
-  if (fileBuf==0 || fileBuf[0]=='\0') return;
+  if (fileBuf==nullptr || fileBuf[0]=='\0') return;
 
   yyextra->defaultProtection = Protection::Public;
   yyextra->inputString = fileBuf;
@@ -3278,7 +3282,7 @@ static void parseMain(yyscan_t yyscanner, const QCString &fileName,const char *f
   yyextra->current_root->moveToSubEntryAndRefresh(yyextra->current);
   yyextra->current->lang    = SrcLangExt::Fortran;
 
-  fortranscannerYYrestart( 0, yyscanner );
+  fortranscannerYYrestart( nullptr, yyscanner );
   {
     BEGIN( Start );
   }
@@ -3299,12 +3303,12 @@ static void parseMain(yyscan_t yyscanner, const QCString &fileName,const char *f
   if (tmpBuf)
   {
     free((char*)tmpBuf);
-    yyextra->inputString=NULL;
+    yyextra->inputString=nullptr;
   }
   if (yyextra->isFixedForm)
   {
     free((char*)yyextra->inputString);
-    yyextra->inputString=NULL;
+    yyextra->inputString=nullptr;
   }
 
 }
@@ -3320,12 +3324,8 @@ struct FortranOutlineParser::Private
   {
     fortranscannerYYlex_init_extra(&extra,&yyscanner);
 #ifdef FLEX_DEBUG
-    fortranscannerYYset_debug(Debug::isFlagSet(Debug::Lex_fortranscanner)?1:0,yyscanner);
+    fortranscannerYYset_debug(Debug::isFlagSet(Debug::Lex_fortranscanner) ? 1 : 0,yyscanner);
 #endif
-  }
-  ~Private()
-  {
-    fortranscannerYYlex_destroy(yyscanner);
   }
 };
 
@@ -3336,6 +3336,7 @@ FortranOutlineParser::FortranOutlineParser(FortranFormat format)
 
 FortranOutlineParser::~FortranOutlineParser()
 {
+  fortranscannerYYlex_destroy(p->yyscanner);
 }
 
 void FortranOutlineParser::parseTextInput(const QCString &fileName,

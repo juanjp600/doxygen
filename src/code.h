@@ -19,6 +19,7 @@
 #define CODE_H
 
 #include "parserintf.h"
+#include "construct.h"
 
 class FileDef;
 class MemberDef;
@@ -29,7 +30,8 @@ class CCodeParser : public CodeParserInterface
 {
   public:
     CCodeParser();
-    virtual ~CCodeParser();
+   ~CCodeParser() override;
+    NON_COPYABLE(CCodeParser)
     void parseTextCode(OutputCodeList &codeOutIntf,
                    const QCString &scopeName,
                    const QCString &input,
@@ -44,8 +46,8 @@ class CCodeParser : public CodeParserInterface
                    bool showLineNumbers=TRUE,
                    const Definition *searchCtx=nullptr,
                    bool collectXRefs=TRUE
-                  );
-    void resetCodeParserState();
+                  ) override;
+    void resetCodeParserState() override;
     CODE_PARSER_REJECT_BINARY;
     void setInsideCodeLine(bool inp);
     bool insideCodeLine() const;

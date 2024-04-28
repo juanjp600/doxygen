@@ -33,6 +33,7 @@ class Markdown
   public:
     Markdown(const QCString &fileName,int lineNr,int indentLevel=0);
    ~Markdown();
+    NON_COPYABLE(Markdown)
     QCString process(const QCString &input, int &startNewlines, bool fromParseInput = false);
     QCString extractPageTitle(QCString &docs, QCString &id, int &prepend, bool &isIdGenerated);
     void setIndentLevel(int level);
@@ -46,13 +47,13 @@ class MarkdownOutlineParser : public OutlineParserInterface
 {
   public:
     MarkdownOutlineParser();
-    virtual ~MarkdownOutlineParser();
+   ~MarkdownOutlineParser() override;
     void parseTextInput(const QCString &fileName,
                     const char *fileBuf,
                     const std::shared_ptr<Entry> &root,
-                    ClangTUParser *clangParser);
-    bool needsPreprocessing(const QCString &) const { return FALSE; }
-    void parsePrototype(const QCString &text);
+                    ClangTUParser *clangParser) override;
+    bool needsPreprocessing(const QCString &) const override { return FALSE; }
+    void parsePrototype(const QCString &text) override;
     OUTLINE_PARSER_REJECT_BINARY;
   private:
     struct Private;

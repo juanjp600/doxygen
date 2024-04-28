@@ -22,18 +22,19 @@
 #include "config.h"
 #include "datetime.h"
 #include "index.h"
+#include "construct.h"
 
 /** Abstract base class for all translatable text fragments. */
 class Translator
 {
   public:
+    ABSTRACT_BASE_CLASS(Translator)
 
     /*! This method is used to provide warning message that is displayed
      *  if the user chooses a language whose translation is not up to date.
      *  It is implemented by the adapter classes.
      */
     virtual QCString updateNeededMessage() { return QCString(); }
-    virtual ~Translator() = default;
 
     // Please, have a look at comments inside the translator_en.h file
     // to learn the meaning of the following methods.  The translator_en.h
@@ -71,13 +72,7 @@ class Translator
      */
     virtual QCString latexCommandName()
     {
-      QCString latex_command = Config_getString(LATEX_CMD_NAME);
-      if (latex_command.isEmpty()) latex_command = "latex";
-      if (Config_getBool(USE_PDFLATEX))
-      {
-        if (latex_command == "latex") latex_command = "pdflatex";
-      }
-      return latex_command;
+      return p_latexCommandName("pdflatex");
     }
     virtual QCString trISOLang() = 0;
 
@@ -769,6 +764,40 @@ class Translator
 // new since 1.11.0
 //////////////////////////////////////////////////////////////////////////
     virtual QCString trImportant() = 0;
+
+  protected:
+    QCString p_latexCommandName(const QCString &latexCmd)
+    {
+      QCString latex_command = Config_getString(LATEX_CMD_NAME);
+      if (latex_command.isEmpty()) latex_command = "latex";
+      if (Config_getBool(USE_PDFLATEX))
+      {
+        if (latex_command == "latex") latex_command = latexCmd;
+      }
+      return latex_command;
+    }
+    /*! For easy flexible-noun implementation.
+     *  \internal
+     */
+    QCString createNoun(bool first_capital, bool singular,
+                        const QCString &base,
+                        const QCString &plurSuffix, const QCString &singSuffix = "" )
+    {
+      QCString result;
+      if (first_capital)
+      {
+        std::string res = getUTF8CharAt(base.str(),0);
+        res = convertUTF8ToUpper(res);
+        result = res.c_str();
+        result += base.mid(res.length());
+      }
+      else
+      {
+        result = base;
+      }
+      result += (singular ? singSuffix : plurSuffix);
+      return result;
+    }
 };
 
 #endif

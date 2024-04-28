@@ -38,7 +38,8 @@ class DirDefImpl : public DefinitionMixin<DirDef>
 {
   public:
     DirDefImpl(const QCString &path);
-    ~DirDefImpl() override;
+   ~DirDefImpl() override;
+    NON_COPYABLE(DirDefImpl)
 
     DefType definitionType() const override { return TypeDir; }
     CodeSymbolType codeSymbolType() const override { return CodeSymbolType::Default; }
@@ -396,7 +397,7 @@ void DirDefImpl::writeFileList(OutputList &ol)
   int numFiles = 0;
   for (const auto &fd : m_fileList)
   {
-    bool genSourceFile;
+    bool genSourceFile=false;
     if (fileVisibleInIndex(fd,genSourceFile))
     {
       numFiles++;
@@ -417,8 +418,8 @@ void DirDefImpl::writeFileList(OutputList &ol)
     ol.startMemberList();
     for (const auto &fd : m_fileList)
     {
-      bool doc,src;
-      doc = fileVisibleInIndex(fd,src);
+      bool src = false;
+      bool doc = fileVisibleInIndex(fd,src);
       if (doc || src)
       {
         ol.startMemberDeclaration();
@@ -793,10 +794,6 @@ UsedDir::UsedDir(const DirDef *dir) :
 {
 }
 
-UsedDir::~UsedDir()
-{
-}
-
 void UsedDir::addFileDep(const FileDef *srcFd,const FileDef *dstFd, bool srcDirect, bool dstDirect)
 {
   m_filePairs.add(FilePair::key(srcFd,dstFd),std::make_unique<FilePair>(srcFd,dstFd));
@@ -1065,8 +1062,8 @@ void buildDirectories()
     {
       if (fd->getReference().isEmpty())
       {
-        DirDef *dir;
-        if ((dir=Doxygen::dirLinkedMap->find(fd->getPath()))==nullptr) // new directory
+        DirDef *dir=Doxygen::dirLinkedMap->find(fd->getPath());
+        if (dir==nullptr) // new directory
         {
           dir = DirDefImpl::mergeDirectoryInTree(fd->getPath());
         }

@@ -53,6 +53,8 @@
 //#define DBG_RTF(x) x;
 #define DBG_RTF(x)
 
+static StringSet removeSet;
+
 static QCString dateToRTFDateString()
 {
   auto tm = getCurrentDateTime();
@@ -82,10 +84,9 @@ static QCString docifyToString(const QCString &str)
   if (!str.isEmpty())
   {
     const char *p=str.data();
-    char c;
     while (*p)
     {
-      c=*p++;
+      char c=*p++;
 
       switch (c)
       {
@@ -154,21 +155,21 @@ void RTFCodeGenerator::codify(const QCString &str)
   if (!str.isEmpty())
   {
     const char *p=str.data();
-    char c;
-    int spacesToNextTabStop;
 
     while (*p)
     {
       //static bool MultiByte = FALSE;
 
-      c=*p++;
+      char c=*p++;
 
       switch(c)
       {
-        case '\t':  spacesToNextTabStop = Config_getInt(TAB_SIZE) - (m_col%Config_getInt(TAB_SIZE));
-                    *m_t << Doxygen::spaces.left(spacesToNextTabStop);
-                    m_col+=spacesToNextTabStop;
-                    break;
+        case '\t':  {
+                      int spacesToNextTabStop = Config_getInt(TAB_SIZE) - (m_col%Config_getInt(TAB_SIZE));
+                      *m_t << Doxygen::spaces.left(spacesToNextTabStop);
+                      m_col+=spacesToNextTabStop;
+                      break;
+                    }
         case '\n':  *m_t << "\\par\n";
                     m_col=0;
                     break;
@@ -367,8 +368,7 @@ void RTFGenerator::writeStyleSheetFile(TextStream &t)
   t << "# All text after a hash (#) is considered a comment and will be ignored.\n";
   t << "# Remove a hash to activate a line.\n\n";
 
-  int i;
-  for ( i=0 ; rtf_Style_Default[i].reference!=nullptr ; i++ )
+  for (int i=0 ; rtf_Style_Default[i].reference!=nullptr ; i++ )
   {
     t << "# " << rtf_Style_Default[i].name << " = "
               << rtf_Style_Default[i].reference
@@ -596,10 +596,9 @@ void RTFGenerator::beginRTFDocument()
   m_t << "}\n";
 
   // place to write rtf_Table_Default
-  int i;
   int id = -1;
   m_t << "{\\*\\listtable" << "\n";
-  for ( i=0 ; rtf_Table_Default[i].definition!=0 ; i++ )
+  for (int i=0 ; rtf_Table_Default[i].definition ; i++ )
   {
     if (id != rtf_Table_Default[i].id)
     {
@@ -616,7 +615,7 @@ void RTFGenerator::beginRTFDocument()
   m_t << "}" <<"\n";
   m_t << "{\\listoverridetable" <<"\n";
   id = -1;
-  for ( i=0 ; rtf_Table_Default[i].definition!=0 ; i++ )
+  for (int i=0 ; rtf_Table_Default[i].definition ; i++ )
   {
     if (id != rtf_Table_Default[i].id)
     {
@@ -1932,8 +1931,8 @@ void RTFGenerator::startDescTable(const QCString &title)
        "\\trbrdrr\\brdrs\\brdrw10\\brdrcf15 "
        "\\trbrdrh\\brdrs\\brdrw10\\brdrcf15 "
        "\\trbrdrv\\brdrs\\brdrw10\\brdrcf15 \n";
-  int i,columnPos[2] = { 25, 100 };
-  for (i=0;i<2;i++)
+  int columnPos[2] = { 25, 100 };
+  for (int i=0;i<2;i++)
   {
     m_t << "\\clvertalt\\clbrdrt\\brdrs\\brdrw10\\brdrcf15 "
          "\\clbrdrl\\brdrs\\brdrw10\\brdrcf15 "
@@ -2110,7 +2109,7 @@ void RTFGenerator::endMemberSubtitle()
 
 bool isLeadBytes(int c)
 {
-  bool result;
+  bool result=false;           // for SBCS Codepages (cp1252,1251 etc...);
 
   QCString codePage = theTranslator->trRTFansicp();
 
@@ -2129,10 +2128,6 @@ bool isLeadBytes(int c)
   else if (codePage == "950")  // cp950 (Traditional Chinese Big5)
   {
     result = 0x81<=c && c<=0xFE;
-  }
-  else                         // for SBCS Codepages (cp1252,1251 etc...)
-  {
-    result = false;
   }
 
   return result;
@@ -2204,7 +2199,7 @@ static void encodeForOutput(TextStream &t,const QCString &s)
  * VERY brittle routine inline RTF's included by other RTF's.
  * it is recursive and ugly.
  */
-static bool preProcessFile(Dir &d,const QCString &infName, TextStream &t, bool bIncludeHeader=TRUE)
+static bool preProcessFile(Dir &d,const QCString &infName, TextStream &t, bool bIncludeHeader=true, bool removeFile = true)
 {
   static bool rtfDebug = Debug::isFlagSet(Debug::Rtf);
   std::ifstream f = Portable::openInputStream(infName);
@@ -2234,8 +2229,8 @@ static bool preProcessFile(Dir &d,const QCString &infName, TextStream &t, bool b
   while (getline(f,line))
   {
     line+='\n';
-    size_t pos;
-    if ((pos=prevLine.find("INCLUDETEXT \""))!=std::string::npos)
+    size_t pos=prevLine.find("INCLUDETEXT \"");
+    if (pos!=std::string::npos)
     {
       size_t startNamePos  = prevLine.find('"',pos)+1;
       size_t endNamePos    = prevLine.find('"',startNamePos);
@@ -2267,7 +2262,7 @@ static bool preProcessFile(Dir &d,const QCString &infName, TextStream &t, bool b
   }
   f.close();
   // remove temporary file
-  if (!rtfDebug) d.remove(infName.str());
+  if (!rtfDebug && removeFile) removeSet.insert(FileInfo(d.filePath(infName.str())).absFilePath());
   return TRUE;
 }
 
@@ -2375,7 +2370,7 @@ void testRTFOutput(const QCString &name)
 {
   int bcount=0;
   int line=1;
-  int c;
+  int c=0;
   std::ifstream f = Portable::openInputStream(name);
   if (f.is_open())
   {
@@ -2419,6 +2414,8 @@ err:
 bool RTFGenerator::preProcessFileInplace(const QCString &path,const QCString &name)
 {
   static bool rtfDebug = Debug::isFlagSet(Debug::Rtf);
+  QCString rtfOutput = Config_getString(RTF_OUTPUT);
+
   Dir d(path.str());
   // store the original directory
   if (!d.exists())
@@ -2444,12 +2441,12 @@ bool RTFGenerator::preProcessFileInplace(const QCString &path,const QCString &na
   }
   TextStream outt(&f);
 
-  if (!preProcessFile(thisDir,mainRTFName,outt))
+  if (!preProcessFile(thisDir,mainRTFName,outt,true,false))
   {
     // it failed, remove the temp file
     outt.flush();
     f.close();
-    if (!rtfDebug) thisDir.remove(combinedName.str());
+    if (!rtfDebug) removeSet.insert(FileInfo(thisDir.filePath(combinedName.str())).absFilePath());
     Dir::setCurrent(oldDir);
     return FALSE;
   }
@@ -2468,6 +2465,12 @@ bool RTFGenerator::preProcessFileInplace(const QCString &path,const QCString &na
   thisDir.rename(combinedName.str(),mainRTFName.str());
 
   testRTFOutput(mainRTFName);
+
+  for (auto &s : removeSet)
+  {
+    QCString s1(s.c_str());
+    if (s1.startsWith(rtfOutput)) Portable::unlink(s1);
+  }
 
   Dir::setCurrent(oldDir);
   return TRUE;
@@ -2713,14 +2716,14 @@ void RTFGenerator::startMemberDocSimple(bool isEnum)
        "\\trbrdrr\\brdrs\\brdrw10\\brdrcf15 "
        "\\trbrdrh\\brdrs\\brdrw10\\brdrcf15 "
        "\\trbrdrv\\brdrs\\brdrw10\\brdrcf15 \n";
-  int i,n=3,columnPos[3] = { 25, 50, 100 };
+  int n=3,columnPos[3] = { 25, 50, 100 };
   if (isEnum)
   {
     columnPos[0]=30;
     columnPos[1]=100;
     n=2;
   }
-  for (i=0;i<n;i++)
+  for (int i=0;i<n;i++)
   {
     m_t << "\\clvertalt\\clbrdrt\\brdrs\\brdrw10\\brdrcf15 "
          "\\clbrdrl\\brdrs\\brdrw10\\brdrcf15 "

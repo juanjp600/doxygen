@@ -1378,7 +1378,7 @@ static void replaceCommentMarker(yyscan_t yyscanner,std::string_view s)
   if (s.empty()) return;
   size_t p   = 0;
   size_t len = s.length();
-  char c;
+  char c = 0;
   // copy leading blanks
   while (p<len && (c=s[p]) && (c==' ' || c=='\t' || c=='\n'))
   {
@@ -1421,7 +1421,7 @@ static inline int computeIndent(const char *s)
   int col=0;
   int tabSize=Config_getInt(TAB_SIZE);
   const char *p=s;
-  char c;
+  char c = 0;
   while ((c=*p++))
   {
     if (c==' ') col++;
@@ -1490,7 +1490,7 @@ static void startCondSection(yyscan_t yyscanner,const QCString &sectId)
   //printf("startCondSection: skip=%d stack=%d\n",g_skip,g_condStack.count());
   CondParser prs;
   bool expResult = prs.parse(yyextra->fileName,yyextra->lineNr,sectId);
-  yyextra->condStack.push(commentcnvYY_CondCtx(yyextra->lineNr,sectId,yyextra->skip));
+  yyextra->condStack.emplace(yyextra->lineNr,sectId,yyextra->skip);
   if (!expResult) // not enabled
   {
     yyextra->skip=TRUE;
@@ -1678,7 +1678,7 @@ static bool readIncludeFile(yyscan_t yyscanner,const QCString &inc,const QCStrin
         return false;
       }
       lineNr = lineBlock(incText, blockId);
-      int blockPos;
+      int blockPos = 0;
       incText = extractBlock(incText, blockId, blockPos);
       fs->fileBuf.clear();
       if (!incText.isEmpty())
@@ -1713,7 +1713,7 @@ static bool readIncludeFile(yyscan_t yyscanner,const QCString &inc,const QCStrin
     fs->oldRaiseLvl   = oldRaiseLevel;
     fs->oldRaiseLbl   = oldRaiseLabel;
     fs->blockId       = blockId;
-    yy_switch_to_buffer(yy_create_buffer(0, YY_BUF_SIZE, yyscanner),yyscanner);
+    yy_switch_to_buffer(yy_create_buffer(nullptr, YY_BUF_SIZE, yyscanner),yyscanner);
     yyextra->fileName = absFileName;
     yyextra->lineNr   = lineNr;
     yyextra->inBuf    = &fs->fileBuf;

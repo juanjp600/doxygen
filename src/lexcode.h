@@ -30,7 +30,9 @@ class LexCodeParser : public CodeParserInterface
 {
   public:
     LexCodeParser();
-    virtual ~LexCodeParser();
+   ~LexCodeParser() override;
+    NON_COPYABLE(LexCodeParser)
+
     void parseTextCode(OutputCodeList &codeOutIntf,
                    const QCString &scopeName,
                    const QCString &input,
@@ -45,8 +47,8 @@ class LexCodeParser : public CodeParserInterface
                    bool showLineNumbers=TRUE,
                    const Definition *searchCtx=nullptr,
                    bool collectXRefs=TRUE
-                  );
-    void resetCodeParserState();
+                  ) override;
+    void resetCodeParserState() override;
     CODE_PARSER_REJECT_BINARY;
   private:
     struct Private;

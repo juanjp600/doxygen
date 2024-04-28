@@ -189,7 +189,7 @@ static QCString makeRef(const QCString & withoutExtension, const QCString & anch
 
 Qhp::Qhp() : p(std::make_unique<Private>()) {}
 Qhp::~Qhp() = default;
-Qhp::Qhp(Qhp &&) = default;
+DEFAULT_MOVABLE_IMPL(Qhp)
 
 void Qhp::initialize()
 {
@@ -248,7 +248,7 @@ void Qhp::initialize()
   if (std::find(sectionFilterAttributes.begin(), sectionFilterAttributes.end(), "doxygen") ==
       sectionFilterAttributes.end())
   {
-    sectionFilterAttributes.push_back("doxygen");
+    sectionFilterAttributes.emplace_back("doxygen");
   }
   for (const auto &attr : sectionFilterAttributes)
   {

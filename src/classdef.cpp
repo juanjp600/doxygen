@@ -417,7 +417,9 @@ class ClassDefAliasImpl : public DefinitionAliasMixin<ClassDef>
   public:
     ClassDefAliasImpl(const Definition *newScope,const ClassDef *cd)
       : DefinitionAliasMixin(newScope,cd) { init(); }
-    ~ClassDefAliasImpl() override { deinit(); }
+   ~ClassDefAliasImpl() override { deinit(); }
+    NON_COPYABLE(ClassDefAliasImpl)
+
     DefType definitionType() const override { return TypeClass; }
 
     const ClassDef *getCdAlias() const { return toClassDef(getAlias()); }
@@ -880,7 +882,7 @@ void ClassDefImpl::insertBaseClass(ClassDef *cd,const QCString &n,Protection p,
                                Specifier s,const QCString &t)
 {
   //printf("*** insert base class %s into %s\n",qPrint(cd->name()),qPrint(name()));
-  m_impl->inherits.push_back(BaseClassDef(cd,n,p,s,t));
+  m_impl->inherits.emplace_back(cd,n,p,s,t);
   m_impl->isSimple = FALSE;
 }
 
@@ -891,7 +893,7 @@ void ClassDefImpl::insertSubClass(ClassDef *cd,Protection p,
   //printf("*** insert sub class %s into %s\n",qPrint(cd->name()),qPrint(name()));
   bool extractPrivate = Config_getBool(EXTRACT_PRIVATE);
   if (!extractPrivate && cd->protection()==Protection::Private) return;
-  m_impl->inheritedBy.push_back(BaseClassDef(cd,QCString(),p,s,t));
+  m_impl->inheritedBy.emplace_back(cd,QCString(),p,s,t);
   m_impl->isSimple = FALSE;
 }
 
@@ -1280,9 +1282,9 @@ static void writeInheritanceSpecifier(OutputList &ol,const BaseClassDef &bcd)
     ol.startTypewriter();
     ol.docify(" [");
     StringVector sl;
-    if      (bcd.prot==Protection::Protected) sl.push_back("protected");
-    else if (bcd.prot==Protection::Private)   sl.push_back("private");
-    if      (bcd.virt==Specifier::Virtual)    sl.push_back("virtual");
+    if      (bcd.prot==Protection::Protected) sl.emplace_back("protected");
+    else if (bcd.prot==Protection::Private)   sl.emplace_back("private");
+    if      (bcd.virt==Specifier::Virtual)    sl.emplace_back("virtual");
     bool first=true;
     for (const auto &s : sl)
     {
@@ -2533,11 +2535,11 @@ void ClassDefImpl::writeDeclarationLink(OutputList &ol,bool &found,const QCStrin
 void ClassDefImpl::addClassAttributes(OutputList &ol) const
 {
   StringVector sl;
-  if (isFinal())    sl.push_back("final");
-  if (isSealed())   sl.push_back("sealed");
-  if (isAbstract()) sl.push_back("abstract");
-  if (isExported()) sl.push_back("export");
-  if (getLanguage()==SrcLangExt::IDL && isPublished()) sl.push_back("published");
+  if (isFinal())    sl.emplace_back("final");
+  if (isSealed())   sl.emplace_back("sealed");
+  if (isAbstract()) sl.emplace_back("abstract");
+  if (isExported()) sl.emplace_back("export");
+  if (getLanguage()==SrcLangExt::IDL && isPublished()) sl.emplace_back("published");
 
   for (const auto &sx : m_impl->qualifiers)
   {
@@ -2769,7 +2771,7 @@ void ClassDefImpl::writeDocumentation(OutputList &ol) const
   bool sliceOpt   = Config_getBool(OPTIMIZE_OUTPUT_SLICE);
   QCString pageTitle = title();
 
-  HighlightedItem hli;
+  HighlightedItem hli = HighlightedItem::None;
   if (sliceOpt)
   {
     if (compoundType()==Interface)
@@ -2916,7 +2918,7 @@ void ClassDefImpl::writeMemberList(OutputList &ol) const
   ol.pushGeneratorState();
   ol.disableAllBut(OutputType::Html);
 
-  HighlightedItem hli;
+  HighlightedItem hli = HighlightedItem::None;
   if (sliceOpt)
   {
     if (compoundType()==Interface)
@@ -3128,35 +3130,35 @@ void ClassDefImpl::writeMemberList(OutputList &ol) const
           {
             sl.push_back(theTranslator->trVhdlType(md->getVhdlSpecifiers(),TRUE).str()); //append vhdl type
           }
-          else if (md->isFriend()) sl.push_back("friend");
-          else if (md->isRelated()) sl.push_back("related");
+          else if (md->isFriend()) sl.emplace_back("friend");
+          else if (md->isRelated()) sl.emplace_back("related");
           else
           {
             if (Config_getBool(INLINE_INFO) && md->isInline())
-                                                   sl.push_back("inline");
-            if (md->isExplicit())                  sl.push_back("explicit");
-            if (md->isMutable())                   sl.push_back("mutable");
-            if (prot==Protection::Protected)       sl.push_back("protected");
-            else if (prot==Protection::Private)    sl.push_back("private");
-            else if (prot==Protection::Package)    sl.push_back("package");
+                                                   sl.emplace_back("inline");
+            if (md->isExplicit())                  sl.emplace_back("explicit");
+            if (md->isMutable())                   sl.emplace_back("mutable");
+            if (prot==Protection::Protected)       sl.emplace_back("protected");
+            else if (prot==Protection::Private)    sl.emplace_back("private");
+            else if (prot==Protection::Package)    sl.emplace_back("package");
             if (virt==Specifier::Virtual && getLanguage()!=SrcLangExt::ObjC)
-                                                   sl.push_back("virtual");
-            else if (virt==Specifier::Pure)        sl.push_back("pure virtual");
-            if (md->isStatic())                    sl.push_back("static");
-            if (md->isSignal())                    sl.push_back("signal");
-            if (md->isSlot())                      sl.push_back("slot");
+                                                   sl.emplace_back("virtual");
+            else if (virt==Specifier::Pure)        sl.emplace_back("pure virtual");
+            if (md->isStatic())                    sl.emplace_back("static");
+            if (md->isSignal())                    sl.emplace_back("signal");
+            if (md->isSlot())                      sl.emplace_back("slot");
 // this is the extra member page
-            if (md->isOptional())                  sl.push_back("optional");
-            if (md->isAttribute())                 sl.push_back("attribute");
-            if (md->isUNOProperty())               sl.push_back("property");
-            if (md->isReadonly())                  sl.push_back("readonly");
-            if (md->isBound())                     sl.push_back("bound");
-            if (md->isRemovable())                 sl.push_back("removable");
-            if (md->isConstrained())               sl.push_back("constrained");
-            if (md->isTransient())                 sl.push_back("transient");
-            if (md->isMaybeVoid())                 sl.push_back("maybevoid");
-            if (md->isMaybeDefault())              sl.push_back("maybedefault");
-            if (md->isMaybeAmbiguous())            sl.push_back("maybeambiguous");
+            if (md->isOptional())                  sl.emplace_back("optional");
+            if (md->isAttribute())                 sl.emplace_back("attribute");
+            if (md->isUNOProperty())               sl.emplace_back("property");
+            if (md->isReadonly())                  sl.emplace_back("readonly");
+            if (md->isBound())                     sl.emplace_back("bound");
+            if (md->isRemovable())                 sl.emplace_back("removable");
+            if (md->isConstrained())               sl.emplace_back("constrained");
+            if (md->isTransient())                 sl.emplace_back("transient");
+            if (md->isMaybeVoid())                 sl.emplace_back("maybevoid");
+            if (md->isMaybeDefault())              sl.emplace_back("maybedefault");
+            if (md->isMaybeAmbiguous())            sl.emplace_back("maybeambiguous");
           }
           bool firstSpan=true;
           for (const auto &s : sl)
@@ -3539,8 +3541,8 @@ void ClassDefImpl::mergeMembersFromBaseClasses(bool mergeVirtualBaseClass)
 
       for (auto &srcMni : srcMnd)
       {
-        MemberNameInfo *dstMni;
-        if ((dstMni=dstMnd.find(srcMni->memberName())))
+        MemberNameInfo *dstMni=dstMnd.find(srcMni->memberName());
+        if (dstMni)
           // a member with that name is already in the class.
           // the member may hide or reimplement the one in the sub class
           // or there may be another path to the base class that is already
@@ -4091,7 +4093,7 @@ ClassDef *ClassDefImpl::insertTemplateInstance(const QCString &fileName,
       templateClass->setOuterScope(getOuterScope());
       templateClass->setHidden(isHidden());
       templateClass->setArtificial(isArtificial());
-      m_impl->templateInstances.push_back(TemplateInstanceDef(templSpec,templateClass));
+      m_impl->templateInstances.emplace_back(templSpec,templateClass);
 
       // also add nested classes
       for (const auto &innerCd : m_impl->innerClasses)
@@ -4428,7 +4430,7 @@ int ClassDefImpl::countInheritedDecMembers(MemberListType lt,
     for (const auto &ibcd : m_impl->inherits)
     {
       ClassDefMutable *icd=toClassDefMutable(ibcd.classDef);
-      int lt1,lt2;
+      int lt1=-1,lt2=-1;
       if (icd && icd->isLinkable())
       {
         convertProtectionLevel(lt,ibcd.prot,&lt1,&lt2);
@@ -4545,7 +4547,7 @@ void ClassDefImpl::writeInheritedMemberDeclarations(OutputList &ol,ClassDefSet &
       ClassDefMutable *icd=toClassDefMutable(ibcd.classDef);
       if (icd && icd->isLinkable())
       {
-        int lt1,lt3;
+        int lt1=-1, lt3=-1;
         convertProtectionLevel(lt,ibcd.prot,&lt1,&lt3);
         if (lt2==-1 && lt3!=-1)
         {

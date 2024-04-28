@@ -121,14 +121,6 @@ static int compareString(const QCString& s1,const QCString& s2)
 
 //--------------------------------------------------------------------------------------------------
 
-VhdlDocGen::VhdlDocGen()
-{
-}
-
-VhdlDocGen::~VhdlDocGen()
-{
-}
-
  // vhdl keywords included VHDL 2008
 static const std::unordered_set< std::string > g_vhdlKeyWordSet0 =
 {
@@ -225,10 +217,10 @@ static std::map<ClassDef*,std::vector<ClassDef*> > g_packages;
 const MemberDef* VhdlDocGen::findMember(const QCString& className, const QCString& memName)
 {
   std::lock_guard lock(g_vhdlMutex);
-  ClassDef* cd,*ecd=nullptr;
+  ClassDef *ecd=nullptr;
   const MemberDef *mdef=nullptr;
 
-  cd=getClass(className);
+  ClassDef *cd=getClass(className);
   //printf("VhdlDocGen::findMember(%s,%s)=%p\n",qPrint(className),qPrint(memName),cd);
   if (cd==nullptr) return nullptr;
 
@@ -542,7 +534,7 @@ void VhdlDocGen::findAllArchitectures(std::vector<QCString>& qll,const ClassDef 
   for (const auto &citer : *Doxygen::classLinkedMap)
   {
     QCString className=citer->className();
-    int pos;
+    int pos = -1;
     if (cd != citer.get() && (pos=className.find('-'))!=-1)
     {
       QCString postfix=className.mid(pos+1);
@@ -641,13 +633,12 @@ void VhdlDocGen::prepareComment(QCString& qcs)
  */
 void VhdlDocGen::parseFuncProto(const QCString &text,QCString& name,QCString& ret,bool doc)
 {
-  int index,end;
   QCString s1(text);
   QCString temp;
 
-  index=s1.find("(");
+  int index=s1.find("(");
   if (index<0) index=0;
-  end=s1.findRev(")");
+  int end=s1.findRev(")");
 
   if ((end-index)>0)
   {
@@ -2063,7 +2054,6 @@ static void writeUCFLink(const MemberDef* mdef,OutputList &ol)
 //        for cell_inst : [entity] work.proto [ (label|expr) ]
 QCString VhdlDocGen::parseForConfig(QCString & entity,QCString & arch)
 {
-  QCString label;
   if (!entity.contains(":")) return "";
 
   static const reg::Ex exp(R"([:()\s])");
@@ -2072,10 +2062,10 @@ QCString VhdlDocGen::parseForConfig(QCString & entity,QCString & arch)
   {
     return "";
   }
-  label  = ql[0];
+  QCString label(ql[0]);
   entity = ql[1];
-  int index;
-  if ((index=entity.findRev("."))>=0)
+  int index = entity.findRev(".");
+  if (index!=-1)
   {
     entity.remove(0,index+1);
   }
@@ -2112,8 +2102,8 @@ QCString  VhdlDocGen::parseForBinding(QCString & entity,QCString & arch)
 
   std::string label=ql[0];
   entity = ql[1];
-  int index;
-  if ((index=entity.findRev("."))>=0)
+  int index=entity.findRev(".");
+  if (index!=-1)
   {
     entity.remove(0,index+1);
   }
@@ -2796,7 +2786,7 @@ void FlowChart::buildCommentNodes(TextStream & t)
 
     if (fll.type & COMMENT_NO)
     {
-      const FlowChart *to;
+      const FlowChart *to = nullptr;
       if (!begin)
       {
         //  comment between function/process .. begin is linked to start node
@@ -2850,10 +2840,9 @@ void FlowChart::codify(TextStream &t,const QCString &str)
   if (!str.isEmpty())
   {
     const char *p=str.data();
-    char c;
     while (*p)
     {
-      c=*p++;
+      char c=*p++;
       switch(c)
       {
         case '<':  t << "&lt;"; break;
@@ -2867,10 +2856,6 @@ void FlowChart::codify(TextStream &t,const QCString &str)
     }
   }
 }//codify
-
-FlowChart::~FlowChart()
-{
-}
 
 FlowChart::FlowChart(int typ,const QCString &t,const QCString &ex,const QCString &lab)
 {
@@ -3544,7 +3529,7 @@ void FlowChart::writeFlowLinks(TextStream &t)
     }
     else if (kind & (EXIT_NO | NEXT_NO))
     {
-      size_t z;
+      size_t z = 0;
       bool b = kind==NEXT_NO;
       if (!fll.exp.isEmpty())
       {

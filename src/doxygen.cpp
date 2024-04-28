@@ -431,8 +431,8 @@ static void findGroupScope(const Entry *root)
   if (root->section.isGroupDoc() && !root->name.isEmpty() &&
       root->parent() && !root->parent()->name.isEmpty())
   {
-    GroupDef *gd;
-    if ((gd=Doxygen::groupLinkedMap->find(root->name)))
+    GroupDef *gd = Doxygen::groupLinkedMap->find(root->name);
+    if (gd)
     {
       QCString scope = root->parent()->name;
       if (root->parent()->section.isPackageDoc())
@@ -459,8 +459,8 @@ static void organizeSubGroupsFiltered(const Entry *root,bool additional)
     if ((root->groupDocType==Entry::GROUPDOC_NORMAL && !additional) ||
         (root->groupDocType!=Entry::GROUPDOC_NORMAL && additional))
     {
-      GroupDef *gd;
-      if ((gd=Doxygen::groupLinkedMap->find(root->name)))
+      GroupDef *gd = Doxygen::groupLinkedMap->find(root->name);
+      if (gd)
       {
         AUTO_TRACE_ADD("adding {} to group {}",root->name,gd->name());
         addGroupToGroups(root,gd);
@@ -488,7 +488,7 @@ static void buildFileList(const Entry *root)
       !root->name.isEmpty() && !root->tagInfo() // skip any file coming from tag files
      )
   {
-    bool ambig;
+    bool ambig = false;
     FileDef *fd=findFileDef(Doxygen::inputNameLinkedMap,root->name,ambig);
     if (!fd || ambig)
     {
@@ -591,7 +591,7 @@ static void addIncludeFile(DefMutable *cd,FileDef *ifd,const Entry *root)
       includeFile=includeFile.mid(1,includeFile.length()-2);
     }
 
-    bool ambig;
+    bool ambig = false;
     FileDef *fd=nullptr;
     // see if we need to include a verbatim copy of the header file
     //printf("root->includeFile=%s\n",qPrint(root->includeFile));
@@ -696,8 +696,7 @@ static Definition *buildScopeFromQualifiedName(const QCString &name_,SrcLangExt 
   QCString name = stripTemplateSpecifiers(name_);
   int level = name.contains("::");
   //printf("buildScopeFromQualifiedName(%s) level=%d\n",qPrint(name),level);
-  int i=0;
-  int p=0,l;
+  int i=0, p=0, l=0;
   Definition *prevScope=Doxygen::globalScope;
   QCString fullScope;
   while (i<level)
@@ -767,14 +766,14 @@ static Definition *findScopeFromQualifiedName(NamespaceDefMutable *startScope,co
   Definition *resultScope=toDefinition(startScope);
   if (resultScope==nullptr) resultScope=Doxygen::globalScope;
   QCString scope=stripTemplateSpecifiersFromScope(n,FALSE);
-  int l1=0,i1;
-  i1=getScopeFragment(scope,0,&l1);
+  int l1 = 0;
+  int i1 = getScopeFragment(scope,0,&l1);
   if (i1==-1)
   {
     //printf(">no fragments!\n");
     return resultScope;
   }
-  int p=i1+l1,l2=0,i2;
+  int p=i1+l1,l2=0,i2=0;
   while ((i2=getScopeFragment(scope,p,&l2))!=-1)
   {
     QCString nestedNameSpecifier = scope.mid(i1,l1);
@@ -851,7 +850,7 @@ std::unique_ptr<ArgumentList> getTemplateArgumentsFromName(
 {
   // for each scope fragment, check if it is a template and advance through
   // the list if so.
-  int i,p=0;
+  int i=0, p=0;
   auto alIt = tArgLists.begin();
   while ((i=name.find("::",p))!=-1 && alIt!=tArgLists.end())
   {
@@ -1004,7 +1003,6 @@ static void addClassToContext(const Entry *root)
     QCString tagName;
     QCString refFileName;
     const TagInfo *tagInfo = root->tagInfo();
-    int i;
     if (tagInfo)
     {
       tagName     = tagInfo->tagName;
@@ -1017,6 +1015,7 @@ static void addClassToContext(const Entry *root)
       }
     }
     std::unique_ptr<ArgumentList> tArgList;
+    int i=0;
     if ((root->lang==SrcLangExt::CSharp || root->lang==SrcLangExt::Java) && (i=fullName.findRev('<'))!=-1)
     {
       // a Java/C# generic class looks like a C++ specialization, so we need to split the
@@ -1356,7 +1355,7 @@ static void resolveClassNestingRelations()
                 {
                   auto aliasCd = createClassDefAlias(d,cd);
                   QCString aliasFullName = d->qualifiedName()+"::"+aliasCd->localName();
-                  aliases.push_back(ClassAlias(aliasFullName,std::move(aliasCd),dm));
+                  aliases.emplace_back(aliasFullName,std::move(aliasCd),dm);
                   //printf("adding %s to %s as %s\n",qPrint(aliasCd->name()),qPrint(d->name()),qPrint(aliasFullName));
                 }
               }
@@ -2638,7 +2637,6 @@ static bool isVarWithConstructor(const Entry *root)
   QCString type;
   Definition *ctx = nullptr;
   FileDef *fd = root->fileDef();
-  int ti;
   SymbolResolver resolver(fd);
 
   AUTO_TRACE("isVarWithConstructor({})",root->name);
@@ -2673,6 +2671,7 @@ static bool isVarWithConstructor(const Entry *root)
   if (!typePtrType)
   {
     typeIsClass = resolver.resolveClass(ctx,type)!=nullptr;
+    int ti=0;
     if (!typeIsClass && (ti=type.find('<'))!=-1)
     {
       typeIsClass=resolver.resolveClass(ctx,type.left(ti))!=nullptr;
@@ -2838,7 +2837,6 @@ static void addVariable(const Entry *root,int isFuncPtr=-1)
     }
   }
 
-  MemberType mtype;
   type=type.stripWhiteSpace();
   ClassDefMutable *cd=nullptr;
   bool isRelated=FALSE;
@@ -2884,6 +2882,7 @@ static void addVariable(const Entry *root,int isFuncPtr=-1)
               */
   }
 
+  MemberType mtype = MemberType_Variable;
   if (type=="@")
     mtype=MemberType_EnumValue;
   else if (type.startsWith("typedef "))
@@ -2898,8 +2897,6 @@ static void addVariable(const Entry *root,int isFuncPtr=-1)
     mtype=sliceOpt ? MemberType_Sequence : MemberType_Typedef;
   else if (type.find("dictionary<") != -1)
     mtype=sliceOpt ? MemberType_Dictionary : MemberType_Typedef;
-  else
-    mtype=MemberType_Variable;
 
   if (!root->relates.isEmpty()) // related variable
   {
@@ -3207,12 +3204,11 @@ static void addMethodToClass(const Entry *root,ClassDefMutable *cd,
   QCString name=removeRedundantWhiteSpace(rname);
   name.stripPrefix("::");
 
-  MemberType mtype;
+  MemberType mtype = MemberType_Function;
   if (isFriend)                              mtype=MemberType_Friend;
   else if (root->mtype==MethodTypes::Signal) mtype=MemberType_Signal;
   else if (root->mtype==MethodTypes::Slot)   mtype=MemberType_Slot;
   else if (root->mtype==MethodTypes::DCOP)   mtype=MemberType_DCOP;
-  else                                       mtype=MemberType_Function;
 
   // strip redundant template specifier for constructors
   int i = -1;
@@ -3526,9 +3522,9 @@ static void buildFunctionList(const Entry *root)
          * or even multiple function prototypes.
          */
         bool found=FALSE;
-        MemberName *mn;
         MemberDef *md_found=nullptr;
-        if ((mn=Doxygen::functionNameLinkedMap->find(rname)))
+        MemberName *mn = Doxygen::functionNameLinkedMap->find(rname);
+        if (mn)
         {
           AUTO_TRACE_ADD("function '{}' already found",rname);
           for (const auto &imd : *mn)
@@ -3732,8 +3728,8 @@ static void findFriends()
   AUTO_TRACE();
   for (const auto &fn : *Doxygen::functionNameLinkedMap) // for each global function name
   {
-    MemberName *mn;
-    if ((mn=Doxygen::memberNameLinkedMap->find(fn->memberName())))
+    MemberName *mn = Doxygen::memberNameLinkedMap->find(fn->memberName());
+    if (mn)
     { // there are members with the same name
       // for each function with that name
       for (const auto &ifmd : *fn)
@@ -3909,8 +3905,8 @@ static void transferRelatedFunctionDocumentation()
       if (md)
       {
         //printf("  Function '%s'\n",qPrint(md->name()));
-        MemberName *rmn;
-        if ((rmn=Doxygen::memberNameLinkedMap->find(md->name()))) // check if there is a member with the same name
+        MemberName *rmn = Doxygen::memberNameLinkedMap->find(md->name());
+        if (rmn) // check if there is a member with the same name
         {
           //printf("  Member name found\n");
           // for each member with the same name
@@ -4800,7 +4796,7 @@ static QCString extractClassName(const Entry *root)
   // strip any anonymous scopes first
   QCString bName=stripAnonymousNamespaceScope(root->name);
   bName=stripTemplateSpecifiersFromScope(bName);
-  int i;
+  int i=0;
   if ((root->lang==SrcLangExt::CSharp || root->lang==SrcLangExt::Java) &&
       (i=bName.find('<'))!=-1)
   {
@@ -4822,15 +4818,11 @@ static void findInheritedTemplateInstances()
   ClassDefSet visitedClasses;
   for (const auto &[name,root] : g_classEntries)
   {
-    ClassDef *cd;
     QCString bName = extractClassName(root);
-    if ((cd=getClass(bName)))
+    ClassDefMutable *cdm = getClassMutable(bName);
+    if (cdm)
     {
-      ClassDefMutable *cdm = toClassDefMutable(cd);
-      if (cdm)
-      {
-        findBaseClassesForClass(root,cd,cdm,cdm,TemplateInstances,FALSE);
-      }
+      findBaseClassesForClass(root,cdm,cdm,cdm,TemplateInstances,FALSE);
     }
   }
 }
@@ -4840,16 +4832,12 @@ static void findUsedTemplateInstances()
   AUTO_TRACE();
   for (const auto &[name,root] : g_classEntries)
   {
-    ClassDef *cd;
     QCString bName = extractClassName(root);
-    if ((cd=getClass(bName)))
+    ClassDefMutable *cdm = getClassMutable(bName);
+    if (cdm)
     {
-      ClassDefMutable *cdm = toClassDefMutable(cd);
-      if (cdm)
-      {
-        findUsedClassesForClass(root,cd,cdm,cdm,TRUE);
-        cdm->addTypeConstraints();
-      }
+      findUsedClassesForClass(root,cdm,cdm,cdm,TRUE);
+      cdm->addTypeConstraints();
     }
   }
 }
@@ -4859,16 +4847,14 @@ static void computeClassRelations()
   AUTO_TRACE();
   for (const auto &[name,root] : g_classEntries)
   {
-    ClassDefMutable *cd;
-
     QCString bName = extractClassName(root);
-    if ((cd=getClassMutable(bName)))
+    ClassDefMutable *cd = getClassMutable(bName);
+    if (cd)
     {
       findBaseClassesForClass(root,cd,cd,cd,DocumentedOnly,FALSE);
     }
     size_t numMembers = cd ? cd->memberNameInfoLinkedMap().size() : 0;
-    if ((cd==nullptr || (!cd->hasDocumentation() && !cd->isReference())) && numMembers>0 &&
-        !bName.endsWith("::"))
+    if ((cd==nullptr || (!cd->hasDocumentation() && !cd->isReference())) && numMembers>0 && !bName.endsWith("::"))
     {
       if (!root->name.isEmpty() && root->name.find('@')==-1 && // normal name
           (guessSection(root->fileName).isHeader() ||
@@ -6098,11 +6084,10 @@ static void addOverloaded(const Entry *root,MemberName *mn,
     ClassDefMutable *cd = mdm ? mdm->getClassDefMutable() : nullptr;
     if (cd==nullptr) return;
 
-    MemberType mtype;
+    MemberType mtype = MemberType_Function;
     if      (root->mtype==MethodTypes::Signal)  mtype=MemberType_Signal;
     else if (root->mtype==MethodTypes::Slot)    mtype=MemberType_Slot;
     else if (root->mtype==MethodTypes::DCOP)    mtype=MemberType_DCOP;
-    else                                        mtype=MemberType_Function;
 
     // new overloaded member function
     std::unique_ptr<ArgumentList> tArgList =
@@ -6178,42 +6163,42 @@ static void findMember(const Entry *root,
   QCString funcTempList;
   QCString exceptions;
   QCString funcSpec;
-  bool isRelated=FALSE;
-  bool isMemberOf=FALSE;
-  bool isFriend=FALSE;
-  bool done;
+  bool isRelated=false;
+  bool isMemberOf=false;
+  bool isFriend=false;
+  bool done=false;
   TypeSpecifier spec = root->spec;
-  do
+  while (!done)
   {
-    done=TRUE;
+    done=true;
     if (funcDecl.stripPrefix("friend ")) // treat friends as related members
     {
-      isFriend=TRUE;
-      done=FALSE;
+      isFriend=true;
+      done=false;
     }
     if (funcDecl.stripPrefix("inline "))
     {
       spec.setInline(true);
-      done=FALSE;
+      done=false;
     }
     if (funcDecl.stripPrefix("explicit "))
     {
       spec.setExplicit(true);
-      done=FALSE;
+      done=false;
     }
     if (funcDecl.stripPrefix("mutable "))
     {
       spec.setMutable(true);
-      done=FALSE;
+      done=false;
     }
     if (funcDecl.stripPrefix("virtual "))
     {
-      done=FALSE;
+      done=false;
     }
-  } while (!done);
+  }
 
   // delete any ; from the function declaration
-  int sep;
+  int sep=0;
   while ((sep=funcDecl.find(';'))!=-1)
   {
     funcDecl=(funcDecl.left(sep)+funcDecl.right(funcDecl.length()-sep-1)).stripWhiteSpace();
@@ -6576,7 +6561,7 @@ static void findMember(const Entry *root,
 
         if (newMember) // need to create a new member
         {
-          MemberType mtype;
+          MemberType mtype = MemberType_Function;
           if (mdDefine)
             mtype=MemberType_Define;
           else if (root->mtype==MethodTypes::Signal)
@@ -6585,8 +6570,6 @@ static void findMember(const Entry *root,
             mtype=MemberType_Slot;
           else if (root->mtype==MethodTypes::DCOP)
             mtype=MemberType_DCOP;
-          else
-            mtype=MemberType_Function;
 
           if (mdDefine)
           {
@@ -6774,7 +6757,6 @@ static void findMember(const Entry *root,
 
 static void filterMemberDocumentation(const Entry *root,const QCString &relates)
 {
-  int i=-1,l;
   AUTO_TRACE("root->type='{}' root->inside='{}' root->name='{}' root->args='{}' section={} root->spec={} root->mGrpId={}",
       root->type,root->inside,root->name,root->args,root->section,root->spec,root->mGrpId);
   //printf("root->parent()->name=%s\n",qPrint(root->parent()->name));
@@ -6782,6 +6764,7 @@ static void filterMemberDocumentation(const Entry *root,const QCString &relates)
 
   QCString type = root->type;
   QCString args = root->args;
+  int i=-1, l=0;
   if ( // detect func variable/typedef to func ptr
       (i=findFunctionPtr(type.str(),root->lang,&l))!=-1
      )
@@ -6984,20 +6967,20 @@ static void findEnums(const Entry *root)
 {
   if (root->section.isEnum())
   {
-    ClassDefMutable *cd=nullptr;
-    FileDef         *fd=nullptr;
-    NamespaceDefMutable *nd=nullptr;
-    MemberNameLinkedMap *mnsd=nullptr;
-    bool isGlobal;
-    bool isRelated=FALSE;
-    bool isMemberOf=FALSE;
+    ClassDefMutable     *cd        = nullptr;
+    FileDef             *fd        = nullptr;
+    NamespaceDefMutable *nd        = nullptr;
+    MemberNameLinkedMap *mnsd      = nullptr;
+    bool                isGlobal   = false;
+    bool                isRelated  = false;
+    bool                isMemberOf = false;
     //printf("Found enum with name '%s' relates=%s\n",qPrint(root->name),qPrint(root->relates));
-    int i;
 
     QCString name;
     QCString scope;
 
-    if ((i=root->name.findRev("::"))!=-1) // scope is specified
+    int i = root->name.findRev("::");
+    if (i!=-1) // scope is specified
     {
       scope=root->name.left(i); // extract scope
       name=root->name.right(root->name.length()-i-2); // extract name
@@ -7032,18 +7015,18 @@ static void findEnums(const Entry *root)
       //printf("Enum '%s'::'%s'\n",qPrint(cd->name()),qPrint(name));
       fd=nullptr;
       mnsd=Doxygen::memberNameLinkedMap;
-      isGlobal=FALSE;
+      isGlobal=false;
     }
     else if (nd) // found enum inside namespace
     {
       mnsd=Doxygen::functionNameLinkedMap;
-      isGlobal=TRUE;
+      isGlobal=true;
     }
     else // found a global enum
     {
       fd=root->fileDef();
       mnsd=Doxygen::functionNameLinkedMap;
-      isGlobal=TRUE;
+      isGlobal=true;
     }
 
     if (!name.isEmpty())
@@ -7154,19 +7137,19 @@ static void addEnumValuesToEnums(const Entry *root)
   if (root->section.isEnum())
     // non anonymous enumeration
   {
-    ClassDefMutable     *cd=nullptr;
-    FileDef             *fd=nullptr;
-    NamespaceDefMutable *nd=nullptr;
-    MemberNameLinkedMap *mnsd=nullptr;
-    bool isGlobal;
-    bool isRelated=FALSE;
+    ClassDefMutable     *cd        = nullptr;
+    FileDef             *fd        = nullptr;
+    NamespaceDefMutable *nd        = nullptr;
+    MemberNameLinkedMap *mnsd      = nullptr;
+    bool                 isGlobal  = false;
+    bool                 isRelated = false;
     //printf("Found enum with name '%s' relates=%s\n",qPrint(root->name),qPrint(root->relates));
-    int i;
 
     QCString name;
     QCString scope;
 
-    if ((i=root->name.findRev("::"))!=-1) // scope is specified
+    int i = root->name.findRev("::");
+    if (i!=-1) // scope is specified
     {
       scope=root->name.left(i); // extract scope
       name=root->name.right(root->name.length()-i-2); // extract name
@@ -7200,20 +7183,20 @@ static void addEnumValuesToEnums(const Entry *root)
       //printf("Enum in class '%s'::'%s'\n",qPrint(cd->name()),qPrint(name));
       fd=nullptr;
       mnsd=Doxygen::memberNameLinkedMap;
-      isGlobal=FALSE;
+      isGlobal=false;
     }
     else if (nd && !nd->isAnonymous()) // found enum inside namespace
     {
       //printf("Enum in namespace '%s'::'%s'\n",qPrint(nd->name()),qPrint(name));
       mnsd=Doxygen::functionNameLinkedMap;
-      isGlobal=TRUE;
+      isGlobal=true;
     }
     else // found a global enum
     {
       fd=root->fileDef();
       //printf("Enum in file '%s': '%s'\n",qPrint(fd->name()),qPrint(name));
       mnsd=Doxygen::functionNameLinkedMap;
-      isGlobal=TRUE;
+      isGlobal=true;
     }
 
     if (!name.isEmpty())
@@ -7290,7 +7273,7 @@ static void addEnumValuesToEnums(const Entry *root)
                   fmmd->setAnchor();
                   md->insertEnumField(fmd.get());
                   fmmd->setEnumScope(md,TRUE);
-                  extraMembers.push_back(EnumValueInfo(e->name,std::move(fmd)));
+                  extraMembers.emplace_back(e->name,std::move(fmd));
                 }
               }
               else
@@ -7461,10 +7444,10 @@ static void findEnumDocumentation(const Entry *root)
       root->name.at(0)!='@'        // skip anonymous enums
      )
   {
-    int i;
     QCString name;
     QCString scope;
-    if ((i=root->name.findRev("::"))!=-1) // scope is specified as part of the name
+    int i = root->name.findRev("::");
+    if (i!=-1) // scope is specified as part of the name
     {
       name=root->name.right(root->name.length()-i-2); // extract name
       scope=root->name.left(i); // extract scope
@@ -7493,15 +7476,7 @@ static void findEnumDocumentation(const Entry *root)
       bool found = tryAddEnumDocsToGroupMember(root, name);
       if (!found)
       {
-        MemberName *mn;
-        if (cd)
-        {
-          mn = Doxygen::memberNameLinkedMap->find(name);
-        }
-        else
-        {
-          mn = Doxygen::functionNameLinkedMap->find(name);
-        }
+        MemberName *mn = cd ?  Doxygen::memberNameLinkedMap->find(name) : Doxygen::functionNameLinkedMap->find(name);
         if (mn)
         {
           for (const auto &imd : *mn)
@@ -8049,7 +8024,7 @@ static void generateFileSources()
                   processedFiles.find(incFile)==processedFiles.end())    // not yet marked as processed
               {
                 StringVector moreFiles;
-                bool ambig;
+                bool ambig = false;
                 FileDef *ifd=findFileDef(Doxygen::inputNameLinkedMap,incFile.c_str(),ambig);
                 if (ifd && !ifd->isReference())
                 {
@@ -10199,14 +10174,14 @@ static void parseFilesMultiThreading(const std::shared_ptr<Entry> &root)
     std::vector< std::future< FutureType > > results;
     for (const auto &s : g_inputFiles)
     {
-      bool ambig;
+      bool ambig = false;
       FileDef *fd=findFileDef(Doxygen::inputNameLinkedMap,s.c_str(),ambig);
       ASSERT(fd!=nullptr);
       if (fd->isSource() && !fd->isReference() && fd->getLanguage()==SrcLangExt::Cpp) // this is a source file
       {
         // lambda representing the work to executed by a thread
         auto processFile = [s,&filesToProcess,&processedFilesLock,&processedFiles]() {
-          bool ambig_l;
+          bool ambig_l = false;
           std::vector< std::shared_ptr<Entry> > roots;
           FileDef *fd_l = findFileDef(Doxygen::inputNameLinkedMap,s.c_str(),ambig_l);
           auto clangParser = ClangParser::instance()->createTUParser(fd_l);
@@ -10220,7 +10195,7 @@ static void parseFilesMultiThreading(const std::shared_ptr<Entry> &root)
           {
             if (filesToProcess.find(incFile)!=filesToProcess.end())
             {
-              bool needsToBeProcessed;
+              bool needsToBeProcessed = false;
               {
                 std::lock_guard<std::mutex> lock(processedFilesLock);
                 needsToBeProcessed = processedFiles.find(incFile)==processedFiles.end();
@@ -10261,7 +10236,7 @@ static void parseFilesMultiThreading(const std::shared_ptr<Entry> &root)
       {
         // lambda representing the work to executed by a thread
         auto processFile = [s]() {
-          bool ambig;
+          bool ambig = false;
           std::vector< std::shared_ptr<Entry> > roots;
           FileDef *fd=findFileDef(Doxygen::inputNameLinkedMap,s.c_str(),ambig);
           auto parser { getParserForFile(s.c_str()) };
@@ -10304,7 +10279,7 @@ static void parseFilesMultiThreading(const std::shared_ptr<Entry> &root)
     {
       // lambda representing the work to executed by a thread
       auto processFile = [s]() {
-        bool ambig;
+        bool ambig = false;
         FileDef *fd=findFileDef(Doxygen::inputNameLinkedMap,s.c_str(),ambig);
         auto parser = getParserForFile(s.c_str());
         auto fileRoot = parseFile(*parser.get(),fd,s.c_str(),nullptr,true);
@@ -10340,7 +10315,7 @@ static void parseFilesSingleThreading(const std::shared_ptr<Entry> &root)
     // process source files (and their include dependencies)
     for (const auto &s : g_inputFiles)
     {
-      bool ambig;
+      bool ambig = false;
       FileDef *fd=findFileDef(Doxygen::inputNameLinkedMap,s.c_str(),ambig);
       ASSERT(fd!=nullptr);
       if (fd->isSource() && !fd->isReference() && getLanguageFromFileName(s.c_str())==SrcLangExt::Cpp) // this is a source file
@@ -10376,7 +10351,7 @@ static void parseFilesSingleThreading(const std::shared_ptr<Entry> &root)
     {
       if (processedFiles.find(s)==processedFiles.end()) // not yet processed
       {
-        bool ambig;
+        bool ambig = false;
         FileDef *fd=findFileDef(Doxygen::inputNameLinkedMap,s.c_str(),ambig);
         if (getLanguageFromFileName(s.c_str())==SrcLangExt::Cpp) // not yet processed
         {
@@ -10400,7 +10375,7 @@ static void parseFilesSingleThreading(const std::shared_ptr<Entry> &root)
   {
     for (const auto &s : g_inputFiles)
     {
-      bool ambig;
+      bool ambig = false;
       FileDef *fd=findFileDef(Doxygen::inputNameLinkedMap,s.c_str(),ambig);
       ASSERT(fd!=nullptr);
       std::unique_ptr<OutlineParserInterface> parser { getParserForFile(s.c_str()) };
@@ -10816,9 +10791,9 @@ static const char *getArg(int argc,char **argv,int &optInd)
 class NullOutlineParser : public OutlineParserInterface
 {
   public:
-    void parseTextInput(const QCString &/* file */, const char * /* buf */,const std::shared_ptr<Entry> &, ClangTUParser*) {}
-    bool needsPreprocessing(const QCString &) const { return FALSE; }
-    void parsePrototype(const QCString &) {}
+    void parseTextInput(const QCString &/* file */, const char * /* buf */,const std::shared_ptr<Entry> &, ClangTUParser*) override {}
+    bool needsPreprocessing(const QCString &) const override { return FALSE; }
+    void parsePrototype(const QCString &) override {}
     OUTLINE_PARSER_REJECT_BINARY;
 };
 
@@ -10967,17 +10942,12 @@ void readConfiguration(int argc, char **argv)
 
   int optInd=1;
   QCString configName;
-  QCString layoutName;
-  QCString debugLabel;
-  QCString formatName;
-  QCString listName;
   QCString traceName;
   bool genConfig=false;
   bool shortList=false;
   bool traceTiming=true;
   Config::CompareMode diffList=Config::CompareMode::Full;
   bool updateConfig=false;
-  int retVal;
   bool quiet = false;
   while (optInd<argc && argv[optInd][0]=='-' &&
                (isalpha(argv[optInd][1]) || argv[optInd][1]=='?' ||
@@ -10987,36 +10957,43 @@ void readConfiguration(int argc, char **argv)
     switch(argv[optInd][1])
     {
       case 'g':
-        genConfig=TRUE;
+        {
+          genConfig=TRUE;
+        }
         break;
       case 'l':
-        if (optInd+1>=argc)
         {
-          layoutName="DoxygenLayout.xml";
-        }
-        else
-        {
-          layoutName=argv[optInd+1];
-        }
-        writeDefaultLayoutFile(layoutName);
-        cleanUpDoxygen();
-        exit(0);
-        break;
-      case 'd':
-        debugLabel=getArg(argc,argv,optInd);
-        if (debugLabel.isEmpty())
-        {
-          devUsage();
+          QCString layoutName;
+          if (optInd+1>=argc)
+          {
+            layoutName="DoxygenLayout.xml";
+          }
+          else
+          {
+            layoutName=argv[optInd+1];
+          }
+          writeDefaultLayoutFile(layoutName);
           cleanUpDoxygen();
           exit(0);
         }
-        retVal = Debug::setFlagStr(debugLabel);
-        if (!retVal)
+        break;
+      case 'd':
         {
-          err("option \"-d\" has unknown debug specifier: \"%s\".\n",qPrint(debugLabel));
-          devUsage();
-          cleanUpDoxygen();
-          exit(1);
+          QCString debugLabel=getArg(argc,argv,optInd);
+          if (debugLabel.isEmpty())
+          {
+            devUsage();
+            cleanUpDoxygen();
+            exit(0);
+          }
+          int retVal = Debug::setFlagStr(debugLabel);
+          if (!retVal)
+          {
+            err("option \"-d\" has unknown debug specifier: \"%s\".\n",qPrint(debugLabel));
+            devUsage();
+            cleanUpDoxygen();
+            exit(1);
+          }
         }
         break;
       case 't':
@@ -11063,142 +11040,148 @@ void readConfiguration(int argc, char **argv)
         updateConfig=TRUE;
         break;
       case 'e':
-        formatName=getArg(argc,argv,optInd);
-        if (formatName.isEmpty())
         {
-          err("option \"-e\" is missing format specifier rtf.\n");
-          cleanUpDoxygen();
-          exit(1);
-        }
-        if (qstricmp(formatName.data(),"rtf")==0)
-        {
-          if (optInd+1>=argc)
+          QCString formatName=getArg(argc,argv,optInd);
+          if (formatName.isEmpty())
           {
-            err("option \"-e rtf\" is missing an extensions file name\n");
+            err("option \"-e\" is missing format specifier rtf.\n");
             cleanUpDoxygen();
             exit(1);
           }
-          writeFile(argv[optInd+1],RTFGenerator::writeExtensionsFile);
+          if (qstricmp(formatName.data(),"rtf")==0)
+          {
+            if (optInd+1>=argc)
+            {
+              err("option \"-e rtf\" is missing an extensions file name\n");
+              cleanUpDoxygen();
+              exit(1);
+            }
+            writeFile(argv[optInd+1],RTFGenerator::writeExtensionsFile);
+            cleanUpDoxygen();
+            exit(0);
+          }
+          err("option \"-e\" has invalid format specifier.\n");
           cleanUpDoxygen();
-          exit(0);
+          exit(1);
         }
-        err("option \"-e\" has invalid format specifier.\n");
-        cleanUpDoxygen();
-        exit(1);
         break;
       case 'f':
-        listName=getArg(argc,argv,optInd);
-        if (listName.isEmpty())
         {
-          err("option \"-f\" is missing list specifier.\n");
-          cleanUpDoxygen();
-          exit(1);
-        }
-        if (qstricmp(listName.data(),"emoji")==0)
-        {
-          if (optInd+1>=argc)
+          QCString listName=getArg(argc,argv,optInd);
+          if (listName.isEmpty())
           {
-            err("option \"-f emoji\" is missing an output file name\n");
+            err("option \"-f\" is missing list specifier.\n");
             cleanUpDoxygen();
             exit(1);
           }
-          writeFile(argv[optInd+1],[](TextStream &t) { EmojiEntityMapper::instance().writeEmojiFile(t); });
+          if (qstricmp(listName.data(),"emoji")==0)
+          {
+            if (optInd+1>=argc)
+            {
+              err("option \"-f emoji\" is missing an output file name\n");
+              cleanUpDoxygen();
+              exit(1);
+            }
+            writeFile(argv[optInd+1],[](TextStream &t) { EmojiEntityMapper::instance().writeEmojiFile(t); });
+            cleanUpDoxygen();
+            exit(0);
+          }
+          err("option \"-f\" has invalid list specifier.\n");
           cleanUpDoxygen();
-          exit(0);
+          exit(1);
         }
-        err("option \"-f\" has invalid list specifier.\n");
-        cleanUpDoxygen();
-        exit(1);
         break;
       case 'w':
-        formatName=getArg(argc,argv,optInd);
-        if (formatName.isEmpty())
         {
-          err("option \"-w\" is missing format specifier rtf, html or latex\n");
-          cleanUpDoxygen();
-          exit(1);
-        }
-        if (qstricmp(formatName.data(),"rtf")==0)
-        {
-          if (optInd+1>=argc)
+          QCString formatName=getArg(argc,argv,optInd);
+          if (formatName.isEmpty())
           {
-            err("option \"-w rtf\" is missing a style sheet file name\n");
+            err("option \"-w\" is missing format specifier rtf, html or latex\n");
             cleanUpDoxygen();
             exit(1);
           }
-          if (!writeFile(argv[optInd+1],RTFGenerator::writeStyleSheetFile))
+          if (qstricmp(formatName.data(),"rtf")==0)
           {
-            err("error opening RTF style sheet file %s!\n",argv[optInd+1]);
-            cleanUpDoxygen();
-            exit(1);
-          }
-          cleanUpDoxygen();
-          exit(0);
-        }
-        else if (qstricmp(formatName.data(),"html")==0)
-        {
-          Config::init();
-          if (optInd+4<argc || FileInfo("Doxyfile").exists() || FileInfo("doxyfile").exists())
-             // explicit config file mentioned or default found on disk
-          {
-            QCString df = optInd+4<argc ? argv[optInd+4] : (FileInfo("Doxyfile").exists() ? QCString("Doxyfile") : QCString("doxyfile"));
-            if (!Config::parse(df)) // parse the config file
+            if (optInd+1>=argc)
             {
-              err("error opening or reading configuration file %s!\n",argv[optInd+4]);
+              err("option \"-w rtf\" is missing a style sheet file name\n");
               cleanUpDoxygen();
               exit(1);
             }
-          }
-          if (optInd+3>=argc)
-          {
-            err("option \"-w html\" does not have enough arguments\n");
-            cleanUpDoxygen();
-            exit(1);
-          }
-          Config::postProcess(TRUE);
-          Config::updateObsolete();
-          Config::checkAndCorrect(Config_getBool(QUIET), false);
-          setTranslator(Config_getEnum(OUTPUT_LANGUAGE));
-          writeFile(argv[optInd+1],[&](TextStream &t) { HtmlGenerator::writeHeaderFile(t,argv[optInd+3]); });
-          writeFile(argv[optInd+2],HtmlGenerator::writeFooterFile);
-          writeFile(argv[optInd+3],HtmlGenerator::writeStyleSheetFile);
-          cleanUpDoxygen();
-          exit(0);
-        }
-        else if (qstricmp(formatName.data(),"latex")==0)
-        {
-          Config::init();
-          if (optInd+4<argc || FileInfo("Doxyfile").exists() || FileInfo("doxyfile").exists())
-          {
-            QCString df = optInd+4<argc ? argv[optInd+4] : (FileInfo("Doxyfile").exists() ? QCString("Doxyfile") : QCString("doxyfile"));
-            if (!Config::parse(df))
+            if (!writeFile(argv[optInd+1],RTFGenerator::writeStyleSheetFile))
             {
-              err("error opening or reading configuration file %s!\n",argv[optInd+4]);
+              err("error opening RTF style sheet file %s!\n",argv[optInd+1]);
               cleanUpDoxygen();
               exit(1);
             }
+            cleanUpDoxygen();
+            exit(0);
           }
-          if (optInd+3>=argc)
+          else if (qstricmp(formatName.data(),"html")==0)
           {
-            err("option \"-w latex\" does not have enough arguments\n");
+            Config::init();
+            if (optInd+4<argc || FileInfo("Doxyfile").exists() || FileInfo("doxyfile").exists())
+              // explicit config file mentioned or default found on disk
+            {
+              QCString df = optInd+4<argc ? argv[optInd+4] : (FileInfo("Doxyfile").exists() ? QCString("Doxyfile") : QCString("doxyfile"));
+              if (!Config::parse(df)) // parse the config file
+              {
+                err("error opening or reading configuration file %s!\n",argv[optInd+4]);
+                cleanUpDoxygen();
+                exit(1);
+              }
+            }
+            if (optInd+3>=argc)
+            {
+              err("option \"-w html\" does not have enough arguments\n");
+              cleanUpDoxygen();
+              exit(1);
+            }
+            Config::postProcess(TRUE);
+            Config::updateObsolete();
+            Config::checkAndCorrect(Config_getBool(QUIET), false);
+            setTranslator(Config_getEnum(OUTPUT_LANGUAGE));
+            writeFile(argv[optInd+1],[&](TextStream &t) { HtmlGenerator::writeHeaderFile(t,argv[optInd+3]); });
+            writeFile(argv[optInd+2],HtmlGenerator::writeFooterFile);
+            writeFile(argv[optInd+3],HtmlGenerator::writeStyleSheetFile);
+            cleanUpDoxygen();
+            exit(0);
+          }
+          else if (qstricmp(formatName.data(),"latex")==0)
+          {
+            Config::init();
+            if (optInd+4<argc || FileInfo("Doxyfile").exists() || FileInfo("doxyfile").exists())
+            {
+              QCString df = optInd+4<argc ? argv[optInd+4] : (FileInfo("Doxyfile").exists() ? QCString("Doxyfile") : QCString("doxyfile"));
+              if (!Config::parse(df))
+              {
+                err("error opening or reading configuration file %s!\n",argv[optInd+4]);
+                cleanUpDoxygen();
+                exit(1);
+              }
+            }
+            if (optInd+3>=argc)
+            {
+              err("option \"-w latex\" does not have enough arguments\n");
+              cleanUpDoxygen();
+              exit(1);
+            }
+            Config::postProcess(TRUE);
+            Config::updateObsolete();
+            Config::checkAndCorrect(Config_getBool(QUIET), false);
+            setTranslator(Config_getEnum(OUTPUT_LANGUAGE));
+            writeFile(argv[optInd+1],LatexGenerator::writeHeaderFile);
+            writeFile(argv[optInd+2],LatexGenerator::writeFooterFile);
+            writeFile(argv[optInd+3],LatexGenerator::writeStyleSheetFile);
+            cleanUpDoxygen();
+            exit(0);
+          }
+          else
+          {
+            err("Illegal format specifier \"%s\": should be one of rtf, html or latex\n",qPrint(formatName));
             cleanUpDoxygen();
             exit(1);
           }
-          Config::postProcess(TRUE);
-          Config::updateObsolete();
-          Config::checkAndCorrect(Config_getBool(QUIET), false);
-          setTranslator(Config_getEnum(OUTPUT_LANGUAGE));
-          writeFile(argv[optInd+1],LatexGenerator::writeHeaderFile);
-          writeFile(argv[optInd+2],LatexGenerator::writeFooterFile);
-          writeFile(argv[optInd+3],LatexGenerator::writeStyleSheetFile);
-          cleanUpDoxygen();
-          exit(0);
-        }
-        else
-        {
-          err("Illegal format specifier \"%s\": should be one of rtf, html or latex\n",qPrint(formatName));
-          cleanUpDoxygen();
-          exit(1);
         }
         break;
       case 'm':
@@ -11458,7 +11441,7 @@ void adjustConfiguration()
         portable_iconv_close(cd);
       }
 
-      Doxygen::inputFileEncodingList.push_back(InputFileEncoding(pattern, encoding));
+      Doxygen::inputFileEncodingList.emplace_back(pattern, encoding);
     }
   }
 
@@ -11475,7 +11458,7 @@ void adjustConfiguration()
   // store number of spaces in a tab into Doxygen::spaces
   int tabSize = Config_getInt(TAB_SIZE);
   Doxygen::spaces.resize(tabSize);
-  int sp;for (sp=0;sp<tabSize;sp++) Doxygen::spaces.at(sp)=' ';
+  for (int sp=0; sp<tabSize; sp++) Doxygen::spaces.at(sp)=' ';
   Doxygen::spaces.at(tabSize)='\0';
 }
 
@@ -12582,6 +12565,7 @@ void generateOutput()
   {
     copyLogo(Config_getString(RTF_OUTPUT));
     copyIcon(Config_getString(RTF_OUTPUT));
+    copyExtraFiles(Config_getList(RTF_EXTRA_FILES),"RTF_EXTRA_FILES",Config_getString(RTF_OUTPUT));
   }
 
   FormulaManager &fm = FormulaManager::instance();

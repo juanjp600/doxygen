@@ -2106,18 +2106,17 @@ static yy_size_t getFenceSize(char *txt, yy_size_t leng)
 static void setFileName(yyscan_t yyscanner,const QCString &name)
 {
   YY_EXTRA_TYPE state = preYYget_extra(yyscanner);
-  bool ambig;
+  bool ambig = false;
   FileInfo fi(name.str());
   state->fileName=fi.absFilePath();
   state->yyFileDef=findFileDef(Doxygen::inputNameLinkedMap,state->fileName,ambig);
-  if (state->yyFileDef==0) // if this is not an input file check if it is an
-                      // include file
+  if (state->yyFileDef==nullptr) // if this is not an input file check if it is an include file
   {
     state->yyFileDef=findFileDef(Doxygen::includeNameLinkedMap,state->fileName,ambig);
   }
   //printf("setFileName(%s) state->fileName=%s state->yyFileDef=%p\n",
   //    name,qPrint(state->fileName),state->yyFileDef);
-  if (state->yyFileDef && state->yyFileDef->isReference()) state->yyFileDef=0;
+  if (state->yyFileDef && state->yyFileDef->isReference()) state->yyFileDef=nullptr;
   state->insideIDL = getLanguageFromFileName(state->fileName)==SrcLangExt::IDL;
   state->insideCS = getLanguageFromFileName(state->fileName)==SrcLangExt::CSharp;
   state->insideFtn = getLanguageFromFileName(state->fileName)==SrcLangExt::Fortran;
@@ -2177,7 +2176,7 @@ static std::unique_ptr<FileState> checkAndOpenFile(yyscan_t yyscanner,const QCSt
   if (fi.exists() && fi.isFile())
   {
     const StringVector &exclPatterns = Config_getList(EXCLUDE_PATTERNS);
-    if (patternMatch(fi,exclPatterns)) return 0;
+    if (patternMatch(fi,exclPatterns)) return nullptr;
 
     QCString absName = fi.absFilePath();
 
@@ -2204,7 +2203,7 @@ static std::unique_ptr<FileState> checkAndOpenFile(yyscan_t yyscanner,const QCSt
     if (alreadyProcessed)
     {
       //printf("  already included 2\n");
-      return 0;
+      return nullptr;
     }
     //printf("#include %s\n",qPrint(absName));
 
@@ -2281,7 +2280,7 @@ static std::unique_ptr<FileState> findFile(yyscan_t yyscanner, const QCString &f
       return nullptr;
     }
   }
-  bool ambig;
+  bool ambig = false;
   FileDef *fd=findFileDef(Doxygen::inputNameLinkedMap,fileName,ambig);
   if (fd && !ambig) // fallback in case the file is uniquely named in the input, use that one
   {
@@ -2730,7 +2729,7 @@ static bool replaceFunctionMacro(yyscan_t yyscanner,const QCString &expr,QCStrin
             // marker we do macro expansion.
             if (!hash)
             {
-              expandExpression(yyscanner,substArg,0,0,level+1);
+              expandExpression(yyscanner,substArg,nullptr,0,level+1);
             }
             if (inString)
             {
@@ -2842,13 +2841,13 @@ static void addSeparatorsIfNeeded(yyscan_t yyscanner,const QCString &expr,QCStri
     // peek back in the stream, for a colon character
     char ccPrev = pos==0 || (int)expr.length()<pos ? state->prevChar : expr.at(pos-1);
     QCString leftSpace = ccPrev!=':' && ccPrev!=' ' ? " " : "";
-    int ccNext;
+    int ccNext = 0;
     restExpr=restExpr.stripWhiteSpace();
     if (restExpr.isEmpty()) // peek ahead in the stream for non-whitespace
     {
-      uint32_t j=resultExpr.length();
+      uint32_t j=(uint32_t)resultExpr.length();
       while ((ccNext=getNextChar(yyscanner,resultExpr,nullptr,j))!=EOF && ccNext==' ') { }
-      unputChar(yyscanner,resultExpr,nullptr,j,ccNext);
+      if (ccNext != EOF) unputChar(yyscanner,resultExpr,nullptr,j,(char)ccNext);
     }
     else // take first char from remainder
     {
@@ -2889,7 +2888,7 @@ static bool expandExpression(yyscan_t yyscanner,QCString &expr,QCString *rest,in
   QCString macroName;
   QCString expMacro;
   bool definedTest=FALSE;
-  int i=pos,l,p,len=0;
+  int i=pos, l=0, p=0, len=0;
   int startPos = pos;
   int samePosCount=0;
   while ((p=getNextId(expr,i,&l))!=-1) // search for an macro name
@@ -3013,7 +3012,7 @@ static bool expandExpression(yyscan_t yyscanner,QCString &expr,QCString *rest,in
  */
 static const char *processUntilMatchingTerminator(const char *inputStr,QCString &result)
 {
-  if (inputStr==0) return inputStr;
+  if (inputStr==nullptr) return inputStr;
   char term = *inputStr; // capture start character of the literal
   if (term!='\'' && term!='"') return inputStr; // not a valid literal
   char c=term;
@@ -3100,11 +3099,11 @@ static QCString removeIdsAndMarkers(const QCString &s)
   //printf("removeIdsAndMarkers(%s)\n",qPrint(s));
   if (s.isEmpty()) return s;
   const char *p=s.data();
-  char c;
   bool inNum=FALSE;
   QCString result;
   if (p)
   {
+    char c = 0;
     while ((c=*p))
     {
       if (c=='(') // potential cast, ignore it
@@ -3246,10 +3245,10 @@ static QCString removeMarkers(const QCString &s)
 {
   if (s.isEmpty()) return s;
   const char *p=s.data();
-  char c;
   QCString result;
   if (p)
   {
+    char c = 0;
     while ((c=*p))
     {
       switch(c)
@@ -3311,7 +3310,7 @@ static bool computeExpression(yyscan_t yyscanner,const QCString &expr)
   QCString ee=expr;
   ee = removeMarkers(ee);
   state->expanded.clear();
-  expandExpression(yyscanner,e,0,0,0);
+  expandExpression(yyscanner,e,nullptr,0,0);
   //printf("after expansion '%s'\n",qPrint(e));
   e = removeIdsAndMarkers(e);
   if (e.isEmpty()) return FALSE;
@@ -3330,7 +3329,7 @@ static QCString expandMacro(yyscan_t yyscanner,const QCString &name)
   state->prevChar = yyscanner->yytext_r > YY_CURRENT_BUFFER_LVALUE->yy_ch_buf ? *(yyscanner->yytext_r-1) : 0;
   QCString n=name;
   state->expanded.clear();
-  expandExpression(yyscanner,n,0,0,0);
+  expandExpression(yyscanner,n,nullptr,0,0);
   n=removeMarkers(n);
   state->prevChar=0;
   //printf("expandMacro '%s'->'%s'\n",qPrint(name),qPrint(n));
@@ -3392,7 +3391,7 @@ static void addMacroDefinition(yyscan_t yyscanner)
     // align the items on the first line with the items on the second line
     int k=l+1;
     const char *p=litText.data()+k;
-    char c;
+    char c = 0;
     while ((c=*p++) && (c==' ' || c=='\t')) k++;
     litText=litText.mid(l+1,k-l-1)+litText.stripWhiteSpace();
   }
@@ -3437,7 +3436,7 @@ static inline void outputSpace(yyscan_t yyscanner,char c)
 static inline void outputSpaces(yyscan_t yyscanner,char *s)
 {
   const char *p=s;
-  char c;
+  char c = 0;
   while ((c=*p++))
   {
     if (c=='\t') outputChar(yyscanner,'\t');
@@ -3551,14 +3550,14 @@ static void readIncludeFile(yyscan_t yyscanner,const QCString &inc)
       if (state->includeStack.empty() && oldFileDef)
       {
         PreIncludeInfo *ii = state->includeRelations.find(absIncFileName);
-        if (ii==0)
+        if (ii==nullptr)
         {
-          bool ambig;
+          bool ambig = false;
           FileDef *incFd = findFileDef(Doxygen::inputNameLinkedMap,absIncFileName,ambig);
           state->includeRelations.add(
               absIncFileName,
               oldFileDef,
-              ambig?nullptr:incFd,
+              ambig ? nullptr : incFd,
               incFileName,
               localInclude,
               state->isImported
@@ -3604,13 +3603,13 @@ static void readIncludeFile(yyscan_t yyscanner,const QCString &inc)
       if (state->includeStack.empty() && oldFileDef)
       {
         PreIncludeInfo *ii = state->includeRelations.find(absIncFileName);
-        if (ii==0)
+        if (ii==nullptr)
         {
-          bool ambig;
+          bool ambig = false;
           FileDef *incFd = findFileDef(Doxygen::inputNameLinkedMap,absIncFileName,ambig);
           ii = state->includeRelations.add(absIncFileName,
               oldFileDef,
-              ambig?0:incFd,
+              ambig ? nullptr : incFd,
               incFileName,
               localInclude,
               state->isImported
@@ -3690,7 +3689,7 @@ static QCString escapeAt(const QCString &text)
   QCString result;
   if (!text.isEmpty())
   {
-    char c;
+    char c = 0;
     const char *p=text.data();
     while ((c=*p++))
     {
@@ -3805,14 +3804,14 @@ static Define *isDefined(yyscan_t yyscanner,const QCString &name)
       if (d->undef)
       {
         undef=true;
-        d=0;
+        d=nullptr;
       }
     }
     return d;
   };
 
   Define *def = findDefine(state->localDefines);
-  if (def==0 && !undef)
+  if (def==nullptr && !undef)
   {
     def = findDefine(state->contextDefines);
   }

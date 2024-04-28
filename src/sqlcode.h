@@ -30,7 +30,9 @@ class SQLCodeParser : public CodeParserInterface
 {
   public:
     SQLCodeParser();
-    virtual ~SQLCodeParser();
+   ~SQLCodeParser() override;
+    NON_COPYABLE(SQLCodeParser)
+
     void parseTextCode(OutputCodeList &codeOutIntf,
                    const QCString &scopeName,
                    const QCString &input,
@@ -45,8 +47,8 @@ class SQLCodeParser : public CodeParserInterface
                    bool showLineNumbers=TRUE,
                    const Definition *searchCtx=nullptr,
                    bool collectXRefs=TRUE
-                  );
-    void resetCodeParserState();
+                  ) override;
+    void resetCodeParserState() override;
     CODE_PARSER_REJECT_BINARY;
   private:
     struct Private;

@@ -28,14 +28,15 @@ class VHDLOutlineParser : public OutlineParserInterface
 {
   public:
     VHDLOutlineParser();
-    virtual ~VHDLOutlineParser();
+   ~VHDLOutlineParser() override;
+    NON_COPYABLE(VHDLOutlineParser)
     void parseTextInput(const QCString &fileName,
                     const char *fileBuf,
                     const std::shared_ptr<Entry> &root,
-                    ClangTUParser *clangParser);
+                    ClangTUParser *clangParser) override;
 
-    bool needsPreprocessing(const QCString &) const { return TRUE; }
-    void parsePrototype(const QCString &text);
+    bool needsPreprocessing(const QCString &) const override { return TRUE; }
+    void parsePrototype(const QCString &text) override;
     OUTLINE_PARSER_REJECT_BINARY;
 
     // interface for generated parser code

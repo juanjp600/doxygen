@@ -120,7 +120,7 @@ inline void writeXMLCodeString(TextStream &t,const QCString &str, size_t &col)
 {
   if (str.isEmpty()) return;
   const char *s = str.data();
-  char c;
+  char c=0;
   while ((c=*s++))
   {
     switch(c)
@@ -212,16 +212,16 @@ class TextGeneratorXMLImpl : public TextGeneratorIntf
 {
   public:
     TextGeneratorXMLImpl(TextStream &t): m_t(t) {}
-    void writeString(const QCString &s,bool /*keepSpaces*/) const
+    void writeString(std::string_view s,bool /*keepSpaces*/) const override
     {
-      writeXMLString(m_t,s);
+      writeXMLString(m_t,QCString(s));
     }
-    void writeBreak(int) const {}
+    void writeBreak(int) const override {}
     void writeLink(const QCString &extRef,const QCString &file,
-                   const QCString &anchor,const QCString &text
-                  ) const
+                   const QCString &anchor,std::string_view text
+                  ) const override
     {
-      writeXMLLink(m_t,extRef,file,anchor,text,QCString());
+      writeXMLLink(m_t,extRef,file,anchor,QCString(text),QCString());
     }
   private:
     TextStream &m_t;
@@ -231,10 +231,6 @@ class TextGeneratorXMLImpl : public TextGeneratorIntf
 
 XMLCodeGenerator::XMLCodeGenerator(TextStream *t) : m_t(t), m_lineNumber(-1), m_isMemberRef(FALSE), m_col(0),
       m_insideCodeLine(FALSE), m_normalHLNeedStartTag(TRUE), m_insideSpecialHL(FALSE)
-{
-}
-
-XMLCodeGenerator::~XMLCodeGenerator()
 {
 }
 
@@ -2083,7 +2079,7 @@ static void generateXMLForPage(PageDef *pd,TextStream &ti,bool isExample)
   if (pd->localToc().isXmlEnabled() && !sectionRefs.empty())
   {
     t << "    <tableofcontents>\n";
-    int level=1,l;
+    int level=1;
     int maxLevel = pd->localToc().xmlLevel();
     BoolVector inLi(maxLevel+1,false);
     for (const SectionInfo *si : sectionRefs)
@@ -2094,14 +2090,14 @@ static void generateXMLForPage(PageDef *pd,TextStream &ti,bool isExample)
         int nextLevel = si->type().level();
         if (nextLevel>level)
         {
-          for (l=level;l<nextLevel;l++)
+          for (int l=level;l<nextLevel;l++)
           {
             if (l < maxLevel) t << "    <tableofcontents>\n";
           }
         }
         else if (nextLevel<level)
         {
-          for (l=level;l>nextLevel;l--)
+          for (int l=level;l>nextLevel;l--)
           {
             if (l <= maxLevel && inLi[l]) t << "    </tocsect>\n";
             inLi[l]=false;

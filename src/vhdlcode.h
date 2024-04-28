@@ -26,7 +26,9 @@ class VHDLCodeParser : public CodeParserInterface
 {
   public:
     VHDLCodeParser();
-    virtual ~VHDLCodeParser();
+   ~VHDLCodeParser() override;
+    NON_COPYABLE(VHDLCodeParser)
+
     void parseTextCode(OutputCodeList &codeOutIntf,
                    const QCString &scopeName,
                    const QCString &input,
@@ -41,8 +43,8 @@ class VHDLCodeParser : public CodeParserInterface
                    bool showLineNumbers=TRUE,
                    const Definition *searchCtx=nullptr,
                    bool collectXRefs=TRUE
-                  );
-    void resetCodeParserState();
+                  ) override;
+    void resetCodeParserState() override;
     CODE_PARSER_REJECT_BINARY;
   private:
     struct Private;

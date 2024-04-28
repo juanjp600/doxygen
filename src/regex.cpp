@@ -201,7 +201,7 @@ void Ex::Private::compile()
   if (pattern.empty()) return;
   const char *start = pattern.c_str();
   const char *ps = start;
-  char c;
+  char c = 0;
 
   int prevTokenPos=-1;
   int tokenPos=0;
@@ -701,9 +701,7 @@ Ex::Ex(std::string_view pattern, Mode mode)
 #endif
 }
 
-Ex::~Ex()
-{
-}
+Ex::~Ex() = default;
 
 bool Ex::match(std::string_view str,Match &match,size_t pos) const
 {

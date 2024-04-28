@@ -56,7 +56,9 @@ class NamespaceDefImpl : public DefinitionMixin<NamespaceDefMutable>
                  const QCString &name,const QCString &ref=QCString(),
                  const QCString &refFile=QCString(),const QCString &type=QCString(),
                  bool isPublished=false);
-    virtual ~NamespaceDefImpl();
+   ~NamespaceDefImpl() override;
+    NON_COPYABLE(NamespaceDefImpl)
+
     DefType definitionType() const override { return TypeNamespace; }
     CodeSymbolType codeSymbolType() const override
     { return getLanguage()==SrcLangExt::Java ? CodeSymbolType::Package : CodeSymbolType::Namespace; }
@@ -180,7 +182,9 @@ class NamespaceDefAliasImpl : public DefinitionAliasMixin<NamespaceDef>
   public:
     NamespaceDefAliasImpl(const Definition *newScope,const NamespaceDef *nd)
       : DefinitionAliasMixin(newScope,nd) { init(); }
-    ~NamespaceDefAliasImpl()  override{ deinit(); }
+    ~NamespaceDefAliasImpl()  override { deinit(); }
+    NON_COPYABLE(NamespaceDefAliasImpl)
+
     DefType definitionType() const override { return TypeNamespace; }
 
     const NamespaceDef *getNSAlias() const { return toNamespaceDef(getAlias()); }
@@ -572,9 +576,8 @@ void NamespaceDefImpl::insertMember(MemberDef *md)
         }
         if (aliasMd)
         {
-          MemberName *mn;
           QCString name = md->name();
-          mn = Doxygen::functionNameLinkedMap->add(name);
+          MemberName *mn = Doxygen::functionNameLinkedMap->add(name);
           mn->push_back(std::move(aliasMd));
         }
       }

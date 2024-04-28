@@ -41,10 +41,6 @@ MemberGroup::MemberGroup(const Definition *container,int id,const QCString &hdr,
   //printf("Member group docs='%s'\n",qPrint(doc));
 }
 
-MemberGroup::~MemberGroup()
-{
-}
-
 void MemberGroup::insertMember(MemberDef *md)
 {
   //printf("MemberGroup::insertMember memberList=%p count=%d"
@@ -68,7 +64,7 @@ void MemberGroup::insertMember(MemberDef *md)
   memberList->push_back(md);
 
   // copy the group of the first member in the memberGroup
-  GroupDef *gd;
+  GroupDef *gd = nullptr;
   if (firstMd && !firstMd->isAlias() && (gd=const_cast<GroupDef*>(firstMd->getGroupDef())))
   {
     MemberDefMutable *mdm = toMemberDefMutable(md);

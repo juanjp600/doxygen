@@ -55,7 +55,6 @@ struct FTVNode
     : isLast(TRUE), isDir(dir), ref(r), file(f), anchor(a), name(n),
       separateIndex(sepIndex), addToNavIndex(navIndex),
       def(df) {}
- ~FTVNode() = default;
   int computeTreeDepth(int level) const;
   int numNodesAtLevel(int level,int maxLevel) const;
   bool isLast;
@@ -119,7 +118,7 @@ struct FTVHelp::Private
  */
 FTVHelp::FTVHelp(bool TLI) : p(std::make_unique<Private>(TLI)) {}
 FTVHelp::~FTVHelp() = default;
-FTVHelp::FTVHelp(FTVHelp &&) = default;
+DEFAULT_MOVABLE_IMPL(FTVHelp)
 
 /*! This will create a folder tree view table of contents file (tree.js).
  *  \sa finalize()
@@ -330,7 +329,7 @@ static void generateBriefDoc(TextStream &t,const Definition *def)
     auto parser { createDocParser() };
     auto ast    { validatingParseDoc(*parser.get(),
                                      def->briefFile(),def->briefLine(),
-                                     def,0,brief,FALSE,FALSE,
+                                     def,nullptr,brief,FALSE,FALSE,
                                      QCString(),TRUE,TRUE,Config_getBool(MARKDOWN_SUPPORT)) };
     const DocNodeAST *astImpl = dynamic_cast<const DocNodeAST*>(ast.get());
     if (astImpl)
@@ -625,8 +624,8 @@ static bool generateJSTree(NavIndexEntryList &navIndex,TextStream &t,
       if (n->def && n->def->definitionType()==Definition::TypeFile)
       {
         const FileDef *fd = toFileDef(n->def);
-        bool doc,src;
-        doc = fileVisibleInIndex(fd,src);
+        bool src = false;
+        bool doc = fileVisibleInIndex(fd,src);
         if (doc)
         {
           navIndex.emplace_back(node2URL(n,TRUE,FALSE),pathToNode(n,n));

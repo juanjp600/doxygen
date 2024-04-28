@@ -23,6 +23,7 @@
 
 #include "types.h"
 #include "containers.h"
+#include "construct.h"
 #include "message.h"
 
 class Entry;
@@ -41,7 +42,7 @@ class ClangTUParser;
 class OutlineParserInterface
 {
   public:
-    virtual ~OutlineParserInterface() = default;
+    ABSTRACT_BASE_CLASS(OutlineParserInterface)
 
     /** Parses a single text input file with the goal to build an Entry tree.
      *  @param[in] fileName    The full name of the file.
@@ -110,7 +111,7 @@ class OutlineParserInterface
 class CodeParserInterface
 {
   public:
-    virtual ~CodeParserInterface() = default;
+    ABSTRACT_BASE_CLASS(CodeParserInterface)
 
     /** Parses a source file or fragment with the goal to produce
      *  highlighted and cross-referenced output.

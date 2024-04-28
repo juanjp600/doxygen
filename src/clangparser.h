@@ -1,11 +1,13 @@
 #ifndef CLANGPARSER_H
 #define CLANGPARSER_H
 
-#include "containers.h"
-#include "types.h"
 #include <memory>
 #include <string>
 #include <cstdint>
+
+#include "containers.h"
+#include "types.h"
+#include "construct.h"
 
 class OutputCodeList;
 class FileDef;
@@ -23,6 +25,7 @@ class ClangTUParser
 {
   public:
     ClangTUParser(const ClangParser &parser,const FileDef *fd);
+    NON_COPYABLE(ClangTUParser)
     virtual ~ClangTUParser();
 
     /** Parse the file given at construction time as a translation unit
@@ -68,8 +71,6 @@ class ClangTUParser
                    const char *text);
     void codeFolding(OutputCodeList &ol,const Definition *d,uint32_t line);
     void endCodeFold(OutputCodeList &ol,uint32_t line);
-    ClangTUParser(const ClangTUParser &) = delete;
-    ClangTUParser &operator=(const ClangTUParser &) = delete;
     class Private;
     std::unique_ptr<Private> p;
 };
@@ -88,6 +89,7 @@ class ClangParser
     class Private;
     std::unique_ptr<Private> p;
     ClangParser();
+    NON_COPYABLE(ClangParser)
     virtual ~ClangParser();
     static ClangParser *s_instance;
 };
