@@ -12,6 +12,13 @@
  * input used in their production; they are not affected by this license.
  *
  */
+
+%{
+  // redefine buffer size (defaults to 16Kb) to avoid a 'flex scanner push-back overflow' error
+  #undef YY_BUF_SIZE
+  #define YY_BUF_SIZE 10*1024*1024  // 10Mb should be sufficient for a source file
+%}
+
 %option never-interactive
 %option prefix="commentcnvYY"
 %option reentrant
@@ -207,8 +214,8 @@ FLOAT_HEXADECIMAL {HEX_FP1}|{HEX_FP2}
 FLOAT_NUMBER {FLOAT_DECIMAL}|{FLOAT_HEXADECIMAL}
 NUMBER {INTEGER_NUMBER}|{FLOAT_NUMBER}
 
-FILEICHAR [a-z_A-Z0-9\\:\\\/\-\+=&#@]
-FILEECHAR [a-z_A-Z0-9\-\+=&#@]
+FILEICHAR [a-z_A-Z0-9\x80-\xFF\\:\\\/\-\+=&#@]
+FILEECHAR [a-z_A-Z0-9\x80-\xFF\-\+=&#@]
 FILECHARS {FILEICHAR}*{FILEECHAR}+
 HFILEMASK {FILEICHAR}*("."{FILEICHAR}+)+{FILECHARS}*
 VFILEMASK {FILECHARS}("."{FILECHARS})*
