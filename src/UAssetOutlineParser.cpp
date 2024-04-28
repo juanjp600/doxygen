@@ -957,6 +957,10 @@ public:
   public:
     bool BoolVal;
   };
+  struct ByteExtraData final {
+  public:
+    UnrealName EnumName;
+  };
   struct EnumExtraData final {
   public:
     UnrealName EnumName;
@@ -987,6 +991,7 @@ public:
   std::optional<std::variant<
     StructExtraData,
     BoolExtraData,
+    ByteExtraData,
     EnumExtraData,
     ArrayExtraData,
     OptionalExtraData,
@@ -1023,7 +1028,11 @@ public:
         Byte boolVal; reader.ReadByte(boolVal);
         extraData.BoolVal = boolVal != 0;
         output.ExtraData = extraData;
-      } else if (typeStr == "EnumName") {
+      } else if (typeStr == "ByteProperty") {
+        ByteExtraData extraData = {};
+        UnrealName::ReadFrom(reader, extraData.EnumName);
+        output.ExtraData = extraData;
+      } else if (typeStr == "EnumProperty") {
         EnumExtraData extraData = {};
         UnrealName::ReadFrom(reader, extraData.EnumName);
         output.ExtraData = extraData;
