@@ -1174,6 +1174,10 @@ void FileDefImpl::writeSourceBody(OutputList &ol,[[maybe_unused]] ClangTUParser 
   {
     auto intf = Doxygen::parserManager->getCodeParser(getDefFileExtension());
     intf->resetCodeParserState();
+    if (intf->isBinaryFileType()) {
+      // TODO: implement output for binary parsers (i.e. blueprint visualization)
+      return;
+    }
     auto &codeOL = ol.codeGenerators();
     codeOL.startCodeFragment("DoxyCode");
     bool needs2PassParsing =
@@ -1184,13 +1188,13 @@ void FileDefImpl::writeSourceBody(OutputList &ol,[[maybe_unused]] ClangTUParser 
     if (needs2PassParsing)
     {
       // parse code for cross-references only (see bug707641)
-      intf->parseCode(devNullList,QCString(),
+      intf->parseTextCode(devNullList,QCString(),
                        fileToString(absFilePath(),TRUE,TRUE),
                        getLanguage(),
                        FALSE,QCString(),this
                       );
     }
-    intf->parseCode(codeOL,QCString(),
+    intf->parseTextCode(codeOL,QCString(),
         fileToString(absFilePath(),filterSourceFiles,TRUE),
         getLanguage(),      // lang
         FALSE,              // isExampleBlock
@@ -1232,7 +1236,7 @@ void FileDefImpl::parseSource([[maybe_unused]] ClangTUParser *clangParser)
   {
     auto intf = Doxygen::parserManager->getCodeParser(getDefFileExtension());
     intf->resetCodeParserState();
-    intf->parseCode(
+    intf->parseTextCode(
             devNullList,QCString(),
             fileToString(absFilePath(),filterSourceFiles,TRUE),
             getLanguage(),

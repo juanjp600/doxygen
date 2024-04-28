@@ -1660,7 +1660,7 @@ static bool readIncludeFile(yyscan_t yyscanner,const QCString &inc,const QCStrin
     }
 
     auto fs = std::make_unique<commentcnv_FileState>();
-    if (!readInputFile(absFileName,fs->fileBuf,false))
+    if (!readInputTextFile(absFileName,fs->fileBuf,false))
     {
       warn_doc_error(yyextra->fileName,yyextra->lineNr,"\\%s{doc} file '%s' could not be read",blockId.isEmpty()?"include":"snippet",qPrint(absFileName));
       fs.reset();

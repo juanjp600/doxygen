@@ -22,7 +22,7 @@
 class FileCodeParser : public CodeParserInterface
 {
   public:
-    void parseCode(OutputCodeList &codeOutIntf,
+    void parseTextCode(OutputCodeList &codeOutIntf,
                    const QCString &scopeName,
                    const QCString &input,
                    SrcLangExt lang,
@@ -38,6 +38,7 @@ class FileCodeParser : public CodeParserInterface
                    bool collectXRefs=TRUE
                   );
     void resetCodeParserState() {}
+    CODE_PARSER_REJECT_BINARY;
 };
 
 #endif

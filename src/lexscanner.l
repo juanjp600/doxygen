@@ -985,7 +985,7 @@ static void handleCCode(yyscan_t yyscanner)
   struct yyguts_t *yyg = (struct yyguts_t*)yyscanner;
 
   if (yyextra->cCodeBuffer.isEmpty()) return;
-  yyextra->cOutlineParser.parseInput(yyextra->fileName,
+  yyextra->cOutlineParser.parseTextInput(yyextra->fileName,
                                      yyextra->cCodeBuffer.data(),
                                      yyextra->current_root,
                                      yyextra->clangParser);
@@ -1013,7 +1013,7 @@ LexOutlineParser::~LexOutlineParser()
   lexscannerYYlex_destroy(p->yyscanner);
 }
 
-void LexOutlineParser::parseInput(const QCString &fileName,
+void LexOutlineParser::parseTextInput(const QCString &fileName,
                                   const char *fileBuf,
                                   const std::shared_ptr<Entry> &root,
                                   ClangTUParser *clangParser)

@@ -27,3 +27,20 @@ cmake-build-debug-event-trace/
 
 /examples/html/*
 /examples/latex/*
+
+CMakeCache.txt
+bin/
+lib/
+doc_internal/
+libversion/
+man/
+src/x64/
+x64/
+generated_src/
+.vs
+*.sln
+*.vcxproj*
+*.cmake
+**/CMakeFiles/
+**/*.dir/
+win_build.bat

@@ -23,6 +23,7 @@
 
 #include "types.h"
 #include "containers.h"
+#include "message.h"
 
 class Entry;
 class FileDef;
@@ -42,23 +43,35 @@ class OutlineParserInterface
   public:
     virtual ~OutlineParserInterface() = default;
 
-    /** Parses a single input file with the goal to build an Entry tree.
+    /** Parses a single text input file with the goal to build an Entry tree.
      *  @param[in] fileName    The full name of the file.
-     *  @param[in] fileBuf     The contents of the file (zero terminated).
+     *  @param[in] fileBuf     The contents of the file. Must be null terminated.
      *  @param[in,out] root    The root of the tree of Entry *nodes
      *             representing the information extracted from the file.
      *  @param[in] clangParser The clang translation unit parser object
      *                         or nullptr if disabled.
      */
-    virtual void parseInput(const QCString &fileName,
-                            const char *fileBuf,
-                            const std::shared_ptr<Entry> &root,
-                            ClangTUParser *clangParser) = 0;
+    virtual void parseTextInput(const QCString &fileName,
+                                const char *fileBuf,
+                                const std::shared_ptr<Entry> &root,
+                                ClangTUParser *clangParser) = 0;
+
+    /** Parses a single binary input file with the goal to build an Entry tree.
+     *  @param[in] fileName    The full name of the file.
+     *  @param[in] fileBuf     The contents of the file.
+     *  @param[in,out] root    The root of the tree of Entry *nodes
+     *             representing the information extracted from the file.
+     *  @param[in] clangParser The clang translation unit parser object
+     *                         or nullptr if disabled.
+     */
+    virtual void parseBinaryInput(const QCString &fileName,
+                                  const std::vector<std::uint8_t> &fileBuf,
+                                  const std::shared_ptr<Entry> &root) = 0;
 
     /** Returns TRUE if the language identified by \a extension needs
      *  the C preprocessor to be run before feed the result to the input
      *  parser.
-     *  @see parseInput()
+     *  @see parseTextInput()
      */
     virtual bool needsPreprocessing(const QCString &extension) const = 0;
 
@@ -70,7 +83,23 @@ class OutlineParserInterface
      */
     virtual void parsePrototype(const QCString &text) = 0;
 
+    /**
+     * Returns TRUE if the parser handles binary input files,
+     * return FALSE if the parser handles text input files.
+     */
+    virtual bool isBinaryFileType() = 0;
+
 };
+
+#define OUTLINE_PARSER_REJECT_BINARY \
+    virtual void parseBinaryInput(const QCString &, const std::vector<std::uint8_t> &, const std::shared_ptr<Entry> &) override\
+    { err("This outline parser doesn't take binary input\n"); }\
+    virtual bool isBinaryFileType() override { return false; }
+#define OUTLINE_PARSER_REJECT_TEXT \
+    virtual void parseTextInput(const QCString &, const char *, const std::shared_ptr<Entry> &, ClangTUParser *) override\
+    { err("This outline parser doesn't take text input\n"); }\
+    virtual bool isBinaryFileType() override { return true; }
+
 
 /** \brief Abstract interface for code parsers.
  *
@@ -87,7 +116,7 @@ class CodeParserInterface
      *  highlighted and cross-referenced output.
      *  @param[in] codeOutList interface for writing the result.
      *  @param[in] scopeName Name of scope to which the code belongs.
-     *  @param[in] input Actual code in the form of a string
+     *  @param[in] input Actual code, in the form of a zero-terminated string.
      *  @param[in] lang The programming language of the code fragment.
      *  @param[in] isExampleBlock TRUE iff the code is part of an example.
      *  @param[in] exampleName Name of the example.
@@ -105,30 +134,84 @@ class CodeParserInterface
      *  @param[in] searchCtx context under which search data has to be stored.
      *  @param[in] collectXRefs collect cross-reference relations.
      */
-    virtual void parseCode(OutputCodeList &codeOutList,
-                           const QCString &scopeName,
-                           const QCString &input,
-                           SrcLangExt lang,
-                           bool isExampleBlock,
-                           const QCString &exampleName=QCString(),
-                           const FileDef *fileDef=nullptr,
-                           int startLine=-1,
-                           int endLine=-1,
-                           bool inlineFragment=FALSE,
-                           const MemberDef *memberDef=nullptr,
-                           bool showLineNumbers=TRUE,
-                           const Definition *searchCtx=nullptr,
-                           bool collectXRefs=TRUE
-                          ) = 0;
+    virtual void parseTextCode(OutputCodeList &codeOutList,
+                               const QCString &scopeName,
+                               const QCString &input,
+                               SrcLangExt lang,
+                               bool isExampleBlock,
+                               const QCString &exampleName=QCString(),
+                               const FileDef *fileDef=nullptr,
+                               int startLine=-1,
+                               int endLine=-1,
+                               bool inlineFragment=FALSE,
+                               const MemberDef *memberDef=nullptr,
+                               bool showLineNumbers=TRUE,
+                               const Definition *searchCtx=nullptr,
+                               bool collectXRefs=TRUE
+                              ) = 0;
+
+    /** Parses a source file or fragment with the goal to produce
+     *  highlighted and cross-referenced output.
+     *  @param[in] codeOutList interface for writing the result.
+     *  @param[in] scopeName Name of scope to which the code belongs.
+     *  @param[in] input Actual code, in the form of a binary buffer.
+     *  @param[in] lang The programming language of the code fragment.
+     *  @param[in] isExampleBlock TRUE iff the code is part of an example.
+     *  @param[in] exampleName Name of the example.
+     *  @param[in] fileDef File definition to which the code
+     *             is associated.
+     *  @param[in] startLine Starting line in case of a code fragment.
+     *  @param[in] endLine Ending line of the code fragment.
+     *  @param[in] inlineFragment Code fragment that is to be shown inline
+     *             as part of the documentation.
+     *  @param[in] memberDef Member definition to which the code
+     *             is associated (non null in case of an inline fragment
+     *             for a member).
+     *  @param[in] showLineNumbers if set to TRUE and also fileDef is not 0,
+     *             line numbers will be added to the source fragment
+     *  @param[in] searchCtx context under which search data has to be stored.
+     *  @param[in] collectXRefs collect cross-reference relations.
+     */
+    virtual void parseBinaryCode(OutputCodeList &codeOutList,
+                               const QCString &scopeName,
+                               const std::vector<std::uint8_t> &input,
+                               SrcLangExt lang,
+                               bool isExampleBlock,
+                               const QCString &exampleName=QCString(),
+                               const FileDef *fileDef=nullptr,
+                               int startLine=-1,
+                               int endLine=-1,
+                               bool inlineFragment=FALSE,
+                               const MemberDef *memberDef=nullptr,
+                               bool showLineNumbers=TRUE,
+                               const Definition *searchCtx=nullptr,
+                               bool collectXRefs=TRUE
+                              ) = 0;
 
     /** Resets the state of the code parser.
      *  Since multiple code fragments can together form a single example, an
      *  explicit function is used to reset the code parser state.
-     *  @see parseCode()
+     *  @see parseTextCode()
      */
     virtual void resetCodeParserState() = 0;
 
+    /**
+     * Returns TRUE if the parser handles binary input files,
+     * return FALSE if the parser handles text input files.
+     */
+    virtual bool isBinaryFileType() = 0;
 };
+
+#define CODE_PARSER_REJECT_BINARY \
+    virtual void parseBinaryCode(OutputCodeList &, const QCString &, const std::vector<std::uint8_t> &, SrcLangExt, bool,\
+        const QCString &, const FileDef *, int, int, bool, const MemberDef *, bool, const Definition *, bool) override\
+    { err("This code parser doesn't take binary input\n"); }\
+    virtual bool isBinaryFileType() override { return false; }
+#define CODE_PARSER_REJECT_TEXT \
+    virtual void parseTextCode(OutputCodeList &, const QCString &, const QCString &, SrcLangExt, bool,\
+        const QCString &, const FileDef *, int, int, bool, const MemberDef *, bool, const Definition *, bool) override\
+    { err("This code parser doesn't take text input\n"); }\
+    virtual bool isBinaryFileType() override { return true; }
 
 //-----------------------------------------------------------------------------
 

@@ -110,6 +110,8 @@
 #include "trace.h"
 #include "moduledef.h"
 #include "stringutil.h"
+#include "UAssetOutlineParser.h"
+#include "UAssetCodeParser.h"
 
 #include <sqlite3.h>
 
@@ -10078,9 +10080,73 @@ static std::unique_ptr<OutlineParserInterface> getParserForFile(const QCString &
   return Doxygen::parserManager->getOutlineParser(extension);
 }
 
-static std::shared_ptr<Entry> parseFile(OutlineParserInterface &parser,
-                      FileDef *fd,const QCString &fn,
-                      ClangTUParser *clangParser,bool newTU)
+static void parseBinaryFile(
+  OutlineParserInterface &parser,
+  FileDef *fd,
+  const QCString &fn,
+  std::shared_ptr<Entry> fileRoot)
+{
+  msg("Reading binary %s...\n", qPrint(fn));
+  std::vector<uint8_t> outBuf;
+  readInputBinaryFile(fn, outBuf);
+  parser.parseBinaryInput(fn, outBuf, fileRoot);
+}
+
+static void parseTextFile(
+  OutlineParserInterface& parser,
+  FileDef *fd,
+  const QCString &fn,
+  ClangTUParser *clangParser,
+  bool newTU,
+  const QCString &fileName,
+  const QCString &extension,
+  std::shared_ptr<Entry> fileRoot)
+{
+  std::string preBuf;
+  if (Config_getBool(ENABLE_PREPROCESSING) &&
+    parser.needsPreprocessing(extension))
+  {
+    Preprocessor preprocessor;
+    const StringVector& includePath = Config_getList(INCLUDE_PATH);
+    for (const auto& s : includePath)
+    {
+      std::string absPath = FileInfo(s).absFilePath();
+      preprocessor.addSearchDir(absPath.c_str());
+    }
+    std::string inBuf;
+    msg("Preprocessing %s...\n", qPrint(fn));
+    readInputTextFile(fileName, inBuf);
+    addTerminalCharIfMissing(inBuf, '\n');
+    preprocessor.processFile(fileName, inBuf, preBuf);
+  }
+  else // no preprocessing
+  {
+    msg("Reading %s...\n", qPrint(fn));
+    readInputTextFile(fileName, preBuf);
+    addTerminalCharIfMissing(preBuf, '\n');
+  }
+
+  std::string convBuf;
+  convBuf.reserve(preBuf.size() + 1024);
+
+  // convert multi-line C++ comments to C style comments
+  convertCppComments(preBuf, convBuf, fileName.str());
+
+  // use language parse to parse the file
+  if (clangParser)
+  {
+    if (newTU) clangParser->parse();
+    clangParser->switchToFile(fd);
+  }
+  parser.parseTextInput(fileName, convBuf.data(), fileRoot, clangParser);
+}
+
+static std::shared_ptr<Entry> parseFile(
+  OutlineParserInterface &parser,
+  FileDef *fd,
+  const QCString &fn,
+  ClangTUParser *clangParser,
+  bool newTU)
 {
   QCString fileName=fn;
   AUTO_TRACE("fileName={}",fileName);
@@ -10096,45 +10162,14 @@ static std::shared_ptr<Entry> parseFile(OutlineParserInterface &parser,
   }
 
   FileInfo fi(fileName.str());
-  std::string preBuf;
-
-  if (Config_getBool(ENABLE_PREPROCESSING) &&
-      parser.needsPreprocessing(extension))
-  {
-    Preprocessor preprocessor;
-    const StringVector &includePath = Config_getList(INCLUDE_PATH);
-    for (const auto &s : includePath)
-    {
-      std::string absPath = FileInfo(s).absFilePath();
-      preprocessor.addSearchDir(absPath.c_str());
-    }
-    std::string inBuf;
-    msg("Preprocessing %s...\n",qPrint(fn));
-    readInputFile(fileName,inBuf);
-    addTerminalCharIfMissing(inBuf,'\n');
-    preprocessor.processFile(fileName,inBuf,preBuf);
-  }
-  else // no preprocessing
-  {
-    msg("Reading %s...\n",qPrint(fn));
-    readInputFile(fileName,preBuf);
-    addTerminalCharIfMissing(preBuf,'\n');
-  }
-
-  std::string convBuf;
-  convBuf.reserve(preBuf.size()+1024);
-
-  // convert multi-line C++ comments to C style comments
-  convertCppComments(preBuf,convBuf,fileName.str());
 
   std::shared_ptr<Entry> fileRoot = std::make_shared<Entry>();
-  // use language parse to parse the file
-  if (clangParser)
-  {
-    if (newTU) clangParser->parse();
-    clangParser->switchToFile(fd);
+  if (parser.isBinaryFileType()) {
+    parseBinaryFile(parser, fd, fn, fileRoot);
   }
-  parser.parseInput(fileName,convBuf.data(),fileRoot,clangParser);
+  else {
+    parseTextFile(parser, fd, fn, clangParser, newTU, fileName, extension, fileRoot);
+  }
   fileRoot->setFileDef(fd);
   return fileRoot;
 }
@@ -10781,9 +10816,10 @@ static const char *getArg(int argc,char **argv,int &optInd)
 class NullOutlineParser : public OutlineParserInterface
 {
   public:
-    void parseInput(const QCString &/* file */, const char * /* buf */,const std::shared_ptr<Entry> &, ClangTUParser*) {}
+    void parseTextInput(const QCString &/* file */, const char * /* buf */,const std::shared_ptr<Entry> &, ClangTUParser*) {}
     bool needsPreprocessing(const QCString &) const { return FALSE; }
     void parsePrototype(const QCString &) {}
+    OUTLINE_PARSER_REJECT_BINARY;
 };
 
 
@@ -10828,6 +10864,8 @@ void initDoxygen()
                                                          make_parser_factory<FileCodeParser>());
   Doxygen::parserManager->registerParser("lex",          make_parser_factory<LexOutlineParser>(),
                                                          make_parser_factory<LexCodeParser>());
+  Doxygen::parserManager->registerParser("uasset",       make_parser_factory<UAssetOutlineParser>(),
+                                                         make_parser_factory<UAssetCodeParser>());
 
   // register any additional parsers here...
 

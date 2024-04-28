@@ -435,7 +435,7 @@ void LatexDocVisitor::operator()(const DocVerbatim &s)
     case DocVerbatim::Code:
       {
         m_ci.startCodeFragment("DoxyCode");
-        getCodeParser(lang).parseCode(m_ci,s.context(),s.text(),langExt,
+        getCodeParser(lang).parseTextCode(m_ci,s.context(),s.text(),langExt,
                                       s.isExample(),s.exampleFile());
         m_ci.endCodeFragment("DoxyCode");
       }
@@ -556,7 +556,7 @@ void LatexDocVisitor::operator()(const DocInclude &inc)
         m_ci.startCodeFragment("DoxyCodeInclude");
         FileInfo cfi( inc.file().str() );
         auto fd = createFileDef( cfi.dirPath(), cfi.fileName() );
-        getCodeParser(inc.extension()).parseCode(m_ci,inc.context(),
+        getCodeParser(inc.extension()).parseTextCode(m_ci,inc.context(),
                                                   inc.text(),
                                                   langExt,
                                                   inc.isExample(),
@@ -574,7 +574,7 @@ void LatexDocVisitor::operator()(const DocInclude &inc)
     case DocInclude::Include:
       {
         m_ci.startCodeFragment("DoxyCodeInclude");
-        getCodeParser(inc.extension()).parseCode(m_ci,inc.context(),
+        getCodeParser(inc.extension()).parseTextCode(m_ci,inc.context(),
                                                   inc.text(),langExt,inc.isExample(),
                                                   inc.exampleFile(),
                                                   nullptr,     // fileDef
@@ -646,7 +646,7 @@ void LatexDocVisitor::operator()(const DocIncOperator &op)
         fd = createFileDef( cfi.dirPath(), cfi.fileName() );
       }
 
-      getCodeParser(locLangExt).parseCode(m_ci,op.context(),op.text(),langExt,
+      getCodeParser(locLangExt).parseTextCode(m_ci,op.context(),op.text(),langExt,
                                           op.isExample(),op.exampleFile(),
                                           fd.get(),     // fileDef
                                           op.line(),    // startLine

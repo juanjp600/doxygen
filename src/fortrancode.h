@@ -31,7 +31,7 @@ class FortranCodeParser : public CodeParserInterface
   public:
     FortranCodeParser(FortranFormat format=FortranFormat_Unknown);
     virtual ~FortranCodeParser();
-    void parseCode(OutputCodeList &codeOutIntf,
+    void parseTextCode(OutputCodeList &codeOutIntf,
                    const QCString &scopeName,
                    const QCString &input,
                    SrcLangExt lang,
@@ -47,6 +47,7 @@ class FortranCodeParser : public CodeParserInterface
                    bool collectXRefs=TRUE
                   );
     void resetCodeParserState();
+    CODE_PARSER_REJECT_BINARY;
 
   private:
     struct Private;

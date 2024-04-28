@@ -205,7 +205,7 @@ void ManDocVisitor::operator()(const DocVerbatim &s)
       if (!m_firstCol) m_t << "\n";
       m_t << ".PP\n";
       m_t << ".nf\n";
-      getCodeParser(lang).parseCode(m_ci,s.context(),s.text(),
+      getCodeParser(lang).parseTextCode(m_ci,s.context(),s.text(),
                                         langExt,
                                         s.isExample(),s.exampleFile());
       if (!m_firstCol) m_t << "\n";
@@ -265,7 +265,7 @@ void ManDocVisitor::operator()(const DocInclude &inc)
          m_t << ".nf\n";
          FileInfo cfi( inc.file().str() );
          auto fd = createFileDef( cfi.dirPath(), cfi.fileName() );
-         getCodeParser(inc.extension()).parseCode(m_ci,inc.context(),
+         getCodeParser(inc.extension()).parseTextCode(m_ci,inc.context(),
                                            inc.text(),
                                            langExt,
                                            inc.isExample(),
@@ -287,7 +287,7 @@ void ManDocVisitor::operator()(const DocInclude &inc)
       if (!m_firstCol) m_t << "\n";
       m_t << ".PP\n";
       m_t << ".nf\n";
-      getCodeParser(inc.extension()).parseCode(m_ci,inc.context(),
+      getCodeParser(inc.extension()).parseTextCode(m_ci,inc.context(),
                                         inc.text(),
                                         langExt,
                                         inc.isExample(),
@@ -376,7 +376,7 @@ void ManDocVisitor::operator()(const DocIncOperator &op)
         fd = createFileDef( cfi.dirPath(), cfi.fileName() );
       }
 
-      getCodeParser(locLangExt).parseCode(m_ci,op.context(),op.text(),langExt,
+      getCodeParser(locLangExt).parseTextCode(m_ci,op.context(),op.text(),langExt,
                                         op.isExample(),op.exampleFile(),
                                         fd.get(),     // fileDef
                                         op.line(),    // startLine

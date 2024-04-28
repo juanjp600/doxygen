@@ -330,7 +330,7 @@ void CodeFragmentManager::parseCodeFragment(OutputCodeList & codeOutList,
     {
       OutputCodeList devNullList;
       devNullList.add<DevNullCodeGenerator>();
-      intf->parseCode(devNullList,
+      intf->parseTextCode(devNullList,
                       scopeName,
                       codeFragment->fileContents,
                       langExt,
@@ -341,7 +341,7 @@ void CodeFragmentManager::parseCodeFragment(OutputCodeList & codeOutList,
     codeFragment->findBlockMarkers();
     if (codeFragment->fileContents.length()>0) // parse the normal version
     {
-      intf->parseCode(codeFragment->recorderCodeList,
+      intf->parseTextCode(codeFragment->recorderCodeList,
           scopeName,
           codeFragment->fileContents,
           langExt,            // lang
@@ -359,7 +359,7 @@ void CodeFragmentManager::parseCodeFragment(OutputCodeList & codeOutList,
     }
     if (codeFragment->fileContentsTrimLeft.length()>0) // also need to parse a version with trimmed indentation
     {
-      intf->parseCode(codeFragment->recorderCodeListTrimLeft,
+      intf->parseTextCode(codeFragment->recorderCodeListTrimLeft,
           scopeName,
           codeFragment->fileContentsTrimLeft,
           langExt,            // lang

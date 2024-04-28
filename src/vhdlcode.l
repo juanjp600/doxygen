@@ -1619,7 +1619,7 @@ void VHDLCodeParser::resetCodeParserState()
   p->state.vhdlKeyDict.clear();
 }
 
-void VHDLCodeParser::parseCode(OutputCodeList &od,
+void VHDLCodeParser::parseTextCode(OutputCodeList &od,
                                const QCString &/* className */,
                                const QCString &s,
                                SrcLangExt,

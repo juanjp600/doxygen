@@ -318,7 +318,7 @@ void RTFDocVisitor::operator()(const DocVerbatim &s)
       m_t << "{\n";
       m_t << "\\par\n";
       m_t << rtf_Style_Reset << getStyle("CodeExample");
-      getCodeParser(lang).parseCode(m_ci,s.context(),s.text(),langExt,
+      getCodeParser(lang).parseTextCode(m_ci,s.context(),s.text(),langExt,
                                     s.isExample(),s.exampleFile());
       //m_t << "\\par\n";
       m_t << "}\n";
@@ -460,7 +460,7 @@ void RTFDocVisitor::operator()(const DocInclude &inc)
          m_t << rtf_Style_Reset << getStyle("CodeExample");
          FileInfo cfi( inc.file().str() );
          auto fd = createFileDef( cfi.dirPath(), cfi.fileName() );
-         getCodeParser(inc.extension()).parseCode(m_ci,inc.context(),
+         getCodeParser(inc.extension()).parseTextCode(m_ci,inc.context(),
                                            inc.text(),
                                            langExt,
                                            inc.isExample(),
@@ -480,7 +480,7 @@ void RTFDocVisitor::operator()(const DocInclude &inc)
       m_t << "{\n";
       m_t << "\\par\n";
       m_t << rtf_Style_Reset << getStyle("CodeExample");
-      getCodeParser(inc.extension()).parseCode(m_ci,inc.context(),
+      getCodeParser(inc.extension()).parseTextCode(m_ci,inc.context(),
                                         inc.text(),langExt,inc.isExample(),
                                         inc.exampleFile(),
                                         nullptr,     // fileDef
@@ -562,7 +562,7 @@ void RTFDocVisitor::operator()(const DocIncOperator &op)
         fd = createFileDef( cfi.dirPath(), cfi.fileName() );
       }
 
-      getCodeParser(locLangExt).parseCode(m_ci,op.context(),op.text(),langExt,
+      getCodeParser(locLangExt).parseTextCode(m_ci,op.context(),op.text(),langExt,
                                         op.isExample(),op.exampleFile(),
                                         fd.get(),     // fileDef
                                         op.line(),    // startLine

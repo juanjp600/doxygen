@@ -30,7 +30,7 @@ class CCodeParser : public CodeParserInterface
   public:
     CCodeParser();
     virtual ~CCodeParser();
-    void parseCode(OutputCodeList &codeOutIntf,
+    void parseTextCode(OutputCodeList &codeOutIntf,
                    const QCString &scopeName,
                    const QCString &input,
                    SrcLangExt lang,
@@ -46,6 +46,7 @@ class CCodeParser : public CodeParserInterface
                    bool collectXRefs=TRUE
                   );
     void resetCodeParserState();
+    CODE_PARSER_REJECT_BINARY;
     void setInsideCodeLine(bool inp);
     bool insideCodeLine() const;
   private:

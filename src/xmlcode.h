@@ -32,7 +32,7 @@ class XMLCodeParser : public CodeParserInterface
   public:
     XMLCodeParser();
     virtual ~XMLCodeParser();
-    void parseCode(OutputCodeList &codeOutIntf,
+    void parseTextCode(OutputCodeList &codeOutIntf,
                    const QCString &scopeName,
                    const QCString &input,
                    SrcLangExt,
@@ -48,6 +48,7 @@ class XMLCodeParser : public CodeParserInterface
                    bool collectXRefs=TRUE
                   );
     void resetCodeParserState();
+    CODE_PARSER_REJECT_BINARY;
   private:
     struct Private;
     std::unique_ptr<Private> p;

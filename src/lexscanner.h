@@ -29,13 +29,13 @@ class LexOutlineParser : public OutlineParserInterface
   public:
     LexOutlineParser();
    ~LexOutlineParser();
-    void parseInput(const QCString &fileName,
-                    const char *fileBuf,
-                    const std::shared_ptr<Entry> &root,
-                    ClangTUParser *clangParser);
+    void parseTextInput(const QCString &fileName,
+                        const char *fileBuf,
+                        const std::shared_ptr<Entry> &root,
+                        ClangTUParser *clangParser);
     bool needsPreprocessing(const QCString &/* extension */) const { return TRUE; };
     void parsePrototype(const QCString &/* text */){}
-
+    OUTLINE_PARSER_REJECT_BINARY;
   private:
     struct Private;
     std::unique_ptr<Private> p;

@@ -1872,7 +1872,7 @@ void VhdlDocGen::writeSource(const MemberDefMutable *mdef,OutputList& ol,const Q
   ol.pushGeneratorState();
   auto &codeOL = ol.codeGenerators();
   codeOL.startCodeFragment("DoxyCode");
-  intf->parseCode(     codeOL,           // codeOutIntf
+  intf->parseTextCode(     codeOL,           // codeOutIntf
                        QCString(),       // scope
                        codeFragment,     // input
                        SrcLangExt::VHDL,  // lang
@@ -2434,7 +2434,7 @@ void VhdlDocGen::createFlowChart(const MemberDef *mdef)
   VhdlDocGen::setFlowMember(mdef);
   std::shared_ptr<Entry> root = std::make_shared<Entry>();
   StringVector filesInSameTu;
-  parser->parseInput("",codeFragment.data(),root,nullptr);
+  parser->parseTextInput("",codeFragment.data(), root, nullptr);
 }
 
 void VhdlDocGen::resetCodeVhdlParserState()

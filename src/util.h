@@ -382,7 +382,9 @@ QCString convertCharEntitiesToUTF8(const QCString &s);
 
 void stackTrace();
 
-bool readInputFile(const QCString &fileName,std::string &contents,
+bool readInputBinaryFile(const QCString &fileName, std::vector<std::uint8_t> &contents);
+
+bool readInputTextFile(const QCString &fileName,std::string &contents,
                    bool filter=TRUE,bool isSourceCode=FALSE);
 QCString filterTitle(const QCString &title);
 

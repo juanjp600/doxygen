@@ -40,24 +40,24 @@ enum class Relationship { Member, Related, Foreign };
 /** Language as given by extension */
 enum class SrcLangExt
 {
-  Unknown  = 0x00000,
-  IDL      = 0x00008,
-  Java     = 0x00010,
-  CSharp   = 0x00020,
-  D        = 0x00040,
-  PHP      = 0x00080,
-  ObjC     = 0x00100,
-  Cpp      = 0x00200,
-  JS       = 0x00400,
-  Python   = 0x00800,
-  Fortran  = 0x01000,
-  VHDL     = 0x02000,
-  XML      = 0x04000,
-  //Tcl      = 0x08000, // no longer supported
-  Markdown = 0x10000,
-  SQL      = 0x20000,
-  Slice    = 0x40000,
-  Lex      = 0x80000
+  Unknown  = 0x000000,
+  IDL      = 0x000008,
+  Java     = 0x000010,
+  CSharp   = 0x000020,
+  D        = 0x000040,
+  PHP      = 0x000080,
+  ObjC     = 0x000100,
+  Cpp      = 0x000200,
+  JS       = 0x000400,
+  Python   = 0x000800,
+  Fortran  = 0x001000,
+  VHDL     = 0x002000,
+  XML      = 0x004000,
+  Markdown = 0x010000,
+  SQL      = 0x020000,
+  Slice    = 0x040000,
+  Lex      = 0x080000,
+  UAsset   = 0x100000,
 };
 
 /** Grouping info */

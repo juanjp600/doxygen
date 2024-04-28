@@ -557,7 +557,7 @@ void HtmlDocVisitor::operator()(const DocVerbatim &s)
     case DocVerbatim::Code:
       forceEndParagraph(s);
       m_ci.startCodeFragment("DoxyCode");
-      getCodeParser(lang).parseCode(m_ci,
+      getCodeParser(lang).parseTextCode(m_ci,
                                         s.context(),
                                         s.text(),
                                         langExt,
@@ -709,7 +709,7 @@ void HtmlDocVisitor::operator()(const DocInclude &inc)
     case DocInclude::Include:
       forceEndParagraph(inc);
       m_ci.startCodeFragment("DoxyCode");
-      getCodeParser(inc.extension()).parseCode(m_ci,
+      getCodeParser(inc.extension()).parseTextCode(m_ci,
                                         inc.context(),
                                         inc.text(),
                                         langExt,
@@ -732,7 +732,7 @@ void HtmlDocVisitor::operator()(const DocInclude &inc)
          m_ci.startCodeFragment("DoxyCode");
          FileInfo cfi( inc.file().str() );
          auto fd = createFileDef( cfi.dirPath(), cfi.fileName() );
-         getCodeParser(inc.extension()).parseCode(m_ci,
+         getCodeParser(inc.extension()).parseTextCode(m_ci,
                                            inc.context(),
                                            inc.text(),
                                            langExt,
@@ -815,7 +815,7 @@ void HtmlDocVisitor::operator()(const DocIncOperator &op)
         FileInfo cfi( op.includeFileName().str() );
         fd = createFileDef( cfi.dirPath(), cfi.fileName() );
       }
-      getCodeParser(locLangExt).parseCode(
+      getCodeParser(locLangExt).parseTextCode(
                                 m_ci,
                                 op.context(),
                                 op.text(),

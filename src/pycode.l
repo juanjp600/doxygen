@@ -1604,7 +1604,7 @@ void PythonCodeParser::resetCodeParserState()
   BEGIN( Body );
 }
 
-void PythonCodeParser::parseCode(OutputCodeList &codeOutIntf,
+void PythonCodeParser::parseTextCode(OutputCodeList &codeOutIntf,
     const QCString &/* scopeName */,
     const QCString &input,
     SrcLangExt /*lang*/,

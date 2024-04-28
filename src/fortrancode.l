@@ -1480,7 +1480,7 @@ void FortranCodeParser::resetCodeParserState()
   BEGIN( Start );
 }
 
-void FortranCodeParser::parseCode(OutputCodeList & codeOutIntf,
+void FortranCodeParser::parseTextCode(OutputCodeList & codeOutIntf,
                    const QCString & /* scopeName */,
                    const QCString & input,
                    SrcLangExt /*lang*/,

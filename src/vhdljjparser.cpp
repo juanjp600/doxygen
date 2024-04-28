@@ -129,7 +129,7 @@ VHDLOutlineParser::~VHDLOutlineParser()
 {
 }
 
-void VHDLOutlineParser::parseInput(const QCString &fileName,const char *fileBuf,
+void VHDLOutlineParser::parseTextInput(const QCString &fileName,const char *fileBuf,
                                    const std::shared_ptr<Entry> &root, ClangTUParser *)
 {
   VhdlParser::SharedState *s = &p->shared;

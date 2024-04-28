@@ -47,12 +47,13 @@ class MarkdownOutlineParser : public OutlineParserInterface
   public:
     MarkdownOutlineParser();
     virtual ~MarkdownOutlineParser();
-    void parseInput(const QCString &fileName,
+    void parseTextInput(const QCString &fileName,
                     const char *fileBuf,
                     const std::shared_ptr<Entry> &root,
                     ClangTUParser *clangParser);
     bool needsPreprocessing(const QCString &) const { return FALSE; }
     void parsePrototype(const QCString &text);
+    OUTLINE_PARSER_REJECT_BINARY;
   private:
     struct Private;
     std::unique_ptr<Private> p;

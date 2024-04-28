@@ -3475,7 +3475,7 @@ MarkdownOutlineParser::~MarkdownOutlineParser()
 {
 }
 
-void MarkdownOutlineParser::parseInput(const QCString &fileName,
+void MarkdownOutlineParser::parseTextInput(const QCString &fileName,
                 const char *fileBuf,
                 const std::shared_ptr<Entry> &root,
                 ClangTUParser* /*clangParser*/)

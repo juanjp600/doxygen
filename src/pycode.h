@@ -35,7 +35,7 @@ class PythonCodeParser : public CodeParserInterface
   public:
     PythonCodeParser();
     virtual ~PythonCodeParser();
-    void parseCode(OutputCodeList &codeOutIntf,
+    void parseTextCode(OutputCodeList &codeOutIntf,
                    const QCString &scopeName,
                    const QCString &input,
                    SrcLangExt lang,
@@ -51,6 +51,7 @@ class PythonCodeParser : public CodeParserInterface
                    bool collectXrefs=TRUE
                   );
     void resetCodeParserState();
+    CODE_PARSER_REJECT_BINARY;
   private:
     struct Private;
     std::unique_ptr<Private> p;

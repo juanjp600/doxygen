@@ -1088,7 +1088,7 @@ void DefinitionImpl::writeInlineCode(OutputList &ol,const QCString &scopeName) c
 
       auto &codeOL = ol.codeGenerators();
       codeOL.startCodeFragment("DoxyCode");
-      intf->parseCode(codeOL,           // codeOutIntf
+      intf->parseTextCode(codeOL,           // codeOutIntf
                       scopeName,        // scope
                       codeFragment,     // input
                       m_impl->lang,     // lang

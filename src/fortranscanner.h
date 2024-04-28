@@ -29,12 +29,13 @@ class FortranOutlineParser : public OutlineParserInterface
   public:
     FortranOutlineParser(FortranFormat format=FortranFormat_Unknown);
    ~FortranOutlineParser();
-    void parseInput(const QCString &fileName,
-                    const char *fileBuf,
-                    const std::shared_ptr<Entry> &root,
-                    ClangTUParser *clangParser);
+    void parseTextInput(const QCString &fileName,
+                        const char *fileBuf,
+                        const std::shared_ptr<Entry> &root,
+                        ClangTUParser *clangParser);
     bool needsPreprocessing(const QCString &extension) const;
     void parsePrototype(const QCString &text);
+    OUTLINE_PARSER_REJECT_BINARY;
 
   private:
     struct Private;

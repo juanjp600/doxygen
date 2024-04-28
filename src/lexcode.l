@@ -1143,7 +1143,7 @@ static void handleCCode(yyscan_t yyscanner)
   if (yyextra->CCodeBuffer.isEmpty()) return;
 
   yyextra->ccodeParser.setInsideCodeLine(yyextra->insideCodeLine);
-  yyextra->ccodeParser.parseCode(*yyextra->code,
+  yyextra->ccodeParser.parseTextCode(*yyextra->code,
                yyextra->classScope,
                yyextra->CCodeBuffer,
                SrcLangExt::Cpp,
@@ -1193,7 +1193,7 @@ void LexCodeParser::resetCodeParserState()
   yyextra->currentMemberDef = 0;
 }
 
-void LexCodeParser::parseCode(OutputCodeList &codeOutIntf,
+void LexCodeParser::parseTextCode(OutputCodeList &codeOutIntf,
                const QCString &scopeName,
                const QCString &input,
                SrcLangExt,

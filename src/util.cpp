@@ -1418,7 +1418,7 @@ QCString fileToString(const QCString &name,bool filter,bool isSourceCode)
       return "";
     }
     std::string buf;
-    fileOpened=readInputFile(name,buf,filter,isSourceCode);
+    fileOpened=readInputTextFile(name,buf,filter,isSourceCode);
     if (fileOpened)
     {
       addTerminalCharIfMissing(buf,'\n');
@@ -5369,25 +5369,26 @@ struct Lang2ExtMap
 static std::vector<Lang2ExtMap> g_lang2extMap =
 {
 //  language       parser           parser option
-  { "idl",         "c",             SrcLangExt::IDL,      ".idl" },
-  { "java",        "c",             SrcLangExt::Java,     ".java"},
-  { "javascript",  "c",             SrcLangExt::JS,       ".js"  },
-  { "csharp",      "c",             SrcLangExt::CSharp,   ".cs"  },
-  { "d",           "c",             SrcLangExt::D,        ".d"   },
-  { "php",         "c",             SrcLangExt::PHP,      ".php" },
-  { "objective-c", "c",             SrcLangExt::ObjC,     ".m"   },
-  { "c",           "c",             SrcLangExt::Cpp,      ".c"   },
-  { "c++",         "c",             SrcLangExt::Cpp,      ".cpp" },
-  { "slice",       "c",             SrcLangExt::Slice,    ".ice" },
-  { "python",      "python",        SrcLangExt::Python,   ".py"  },
-  { "fortran",     "fortran",       SrcLangExt::Fortran,  ".f"   },
-  { "fortranfree", "fortranfree",   SrcLangExt::Fortran,  ".f90" },
-  { "fortranfixed", "fortranfixed", SrcLangExt::Fortran,  ".f"   },
-  { "vhdl",        "vhdl",          SrcLangExt::VHDL,     ".vhdl"},
-  { "xml",         "xml",           SrcLangExt::XML,      ".xml" },
-  { "sql",         "sql",           SrcLangExt::SQL,      ".sql" },
-  { "md",          "md",            SrcLangExt::Markdown, ".md"  },
-  { "lex",         "lex",           SrcLangExt::Lex,      ".l"   },
+  { "idl",         "c",             SrcLangExt::IDL,      ".idl"    },
+  { "java",        "c",             SrcLangExt::Java,     ".java"   },
+  { "javascript",  "c",             SrcLangExt::JS,       ".js"     },
+  { "csharp",      "c",             SrcLangExt::CSharp,   ".cs"     },
+  { "d",           "c",             SrcLangExt::D,        ".d"      },
+  { "php",         "c",             SrcLangExt::PHP,      ".php"    },
+  { "objective-c", "c",             SrcLangExt::ObjC,     ".m"      },
+  { "c",           "c",             SrcLangExt::Cpp,      ".c"      },
+  { "c++",         "c",             SrcLangExt::Cpp,      ".cpp"    },
+  { "slice",       "c",             SrcLangExt::Slice,    ".ice"    },
+  { "python",      "python",        SrcLangExt::Python,   ".py"     },
+  { "fortran",     "fortran",       SrcLangExt::Fortran,  ".f"      },
+  { "fortranfree", "fortranfree",   SrcLangExt::Fortran,  ".f90"    },
+  { "fortranfixed", "fortranfixed", SrcLangExt::Fortran,  ".f"      },
+  { "vhdl",        "vhdl",          SrcLangExt::VHDL,     ".vhdl"   },
+  { "xml",         "xml",           SrcLangExt::XML,      ".xml"    },
+  { "sql",         "sql",           SrcLangExt::SQL,      ".sql"    },
+  { "md",          "md",            SrcLangExt::Markdown, ".md"     },
+  { "lex",         "lex",           SrcLangExt::Lex,      ".l"      },
+  { "uasset",      "uasset",        SrcLangExt::UAsset,   ".uasset" },
 };
 
 bool updateLanguageMapping(const QCString &extension,const QCString &language)
@@ -5487,6 +5488,7 @@ void initDefaultExtensionMapping()
   updateLanguageMapping(".l",        "lex");
   updateLanguageMapping(".doxygen_lex_c", "c"); // this is a placeholder so we can map initializations
                                                 // in the lex scanning to cpp
+  updateLanguageMapping(".uasset", "uasset");
 }
 
 void addCodeOnlyMappings()
@@ -5786,8 +5788,30 @@ static void transcodeCharacterBuffer(const QCString &fileName,std::string &conte
   portable_iconv_close(cd);
 }
 
+bool readInputBinaryFile(const QCString &fileName, std::vector<std::uint8_t> &contents)
+{
+  // try to open file
+  FileInfo fi(fileName.str());
+  if (!fi.exists()) return FALSE;
+  std::ifstream f = Portable::openInputStream(fileName, true);
+  if (!f.is_open())
+  {
+    err("could not open file %s\n", qPrint(fileName));
+    return false;
+  }
+  // read the file
+  contents.resize(fi.size());
+  f.read((char *)contents.data(), fi.size());
+  if (f.fail())
+  {
+    err("problems while reading file %s\n", qPrint(fileName));
+    return false;
+  }
+  return true;
+}
+
 //! read a file name \a fileName and optionally filter and transcode it
-bool readInputFile(const QCString &fileName,std::string &contents,bool filter,bool isSourceCode)
+bool readInputTextFile(const QCString &fileName,std::string &contents,bool filter,bool isSourceCode)
 {
   // try to open file
   FileInfo fi(fileName.str());

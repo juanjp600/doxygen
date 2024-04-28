@@ -36,12 +36,13 @@ class PythonOutlineParser : public OutlineParserInterface
   public:
     PythonOutlineParser();
     virtual ~PythonOutlineParser();
-    void parseInput(const QCString &fileName,
+    void parseTextInput(const QCString &fileName,
                     const char *fileBuf,
                     const std::shared_ptr<Entry> &root,
                     ClangTUParser *clangParser);
     bool needsPreprocessing(const QCString &extension) const;
     void parsePrototype(const QCString &text);
+    OUTLINE_PARSER_REJECT_BINARY;
   private:
     struct Private;
     std::unique_ptr<Private> p;

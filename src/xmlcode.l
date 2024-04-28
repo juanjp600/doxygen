@@ -413,7 +413,7 @@ void XMLCodeParser::resetCodeParserState()
   yyextra->currentMemberDef = 0;
 }
 
-void XMLCodeParser::parseCode(OutputCodeList &codeOutIntf,
+void XMLCodeParser::parseTextCode(OutputCodeList &codeOutIntf,
                const QCString &/* scopeName */,
                const QCString &input,
                SrcLangExt,

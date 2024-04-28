@@ -317,7 +317,7 @@ void XmlDocVisitor::operator()(const DocVerbatim &s)
           m_t << " filename=\"" << lang << "\">";
       else
           m_t << ">";
-      getCodeParser(lang).parseCode(m_ci,s.context(),s.text(),langExt,
+      getCodeParser(lang).parseTextCode(m_ci,s.context(),s.text(),langExt,
                                     s.isExample(),s.exampleFile());
       m_t << "</programlisting>";
       break;
@@ -406,7 +406,7 @@ void XmlDocVisitor::operator()(const DocInclude &inc)
          m_t << "<programlisting filename=\"" << inc.file() << "\">";
          FileInfo cfi( inc.file().str() );
          auto fd = createFileDef( cfi.dirPath(), cfi.fileName());
-         getCodeParser(inc.extension()).parseCode(m_ci,inc.context(),
+         getCodeParser(inc.extension()).parseTextCode(m_ci,inc.context(),
                                            inc.text(),
                                            langExt,
                                            inc.isExample(),
@@ -423,7 +423,7 @@ void XmlDocVisitor::operator()(const DocInclude &inc)
       break;
     case DocInclude::Include:
       m_t << "<programlisting filename=\"" << inc.file() << "\">";
-      getCodeParser(inc.extension()).parseCode(m_ci,inc.context(),
+      getCodeParser(inc.extension()).parseTextCode(m_ci,inc.context(),
                                         inc.text(),
                                         langExt,
                                         inc.isExample(),
@@ -524,7 +524,7 @@ void XmlDocVisitor::operator()(const DocIncOperator &op)
         fd = createFileDef( cfi.dirPath(), cfi.fileName() );
       }
 
-      getCodeParser(locLangExt).parseCode(m_ci,op.context(),
+      getCodeParser(locLangExt).parseTextCode(m_ci,op.context(),
                                           op.text(),langExt,op.isExample(),
                                           op.exampleFile(),
                                           fd.get(),     // fileDef

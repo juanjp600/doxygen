@@ -2209,7 +2209,7 @@ static std::unique_ptr<FileState> checkAndOpenFile(yyscan_t yyscanner,const QCSt
     //printf("#include %s\n",qPrint(absName));
 
     fs = std::make_unique<FileState>();
-    if (!readInputFile(absName,fs->fileBuf))
+    if (!readInputTextFile(absName,fs->fileBuf))
     { // error
       //printf("  error reading\n");
       fs.reset();

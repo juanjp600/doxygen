@@ -323,7 +323,7 @@ DB_VIS_C
   {
     case DocVerbatim::Code:
       m_t << "<literallayout><computeroutput>";
-      getCodeParser(m_langExt).parseCode(m_ci,s.context(),
+      getCodeParser(m_langExt).parseTextCode(m_ci,s.context(),
                                          s.text(),
                                          langExt,
                                          s.isExample(),
@@ -448,7 +448,7 @@ DB_VIS_C
         m_t << "<literallayout><computeroutput>";
         FileInfo cfi( inc.file().str() );
         auto fd = createFileDef( cfi.dirPath(), cfi.fileName() );
-        getCodeParser(inc.extension()).parseCode(m_ci,inc.context(),
+        getCodeParser(inc.extension()).parseTextCode(m_ci,inc.context(),
                                                   inc.text(),
                                                   langExt,
                                                   inc.isExample(),
@@ -458,7 +458,7 @@ DB_VIS_C
       break;
     case DocInclude::Include:
       m_t << "<literallayout><computeroutput>";
-      getCodeParser(inc.extension()).parseCode(m_ci,inc.context(),
+      getCodeParser(inc.extension()).parseTextCode(m_ci,inc.context(),
                                                 inc.text(),
                                                 langExt,
                                                 inc.isExample(),
@@ -524,7 +524,7 @@ DB_VIS_C
         fd = createFileDef( cfi.dirPath(), cfi.fileName() );
       }
 
-      getCodeParser(locLangExt).parseCode(m_ci,op.context(),
+      getCodeParser(locLangExt).parseTextCode(m_ci,op.context(),
                                         op.text(),langExt,op.isExample(),
                                         op.exampleFile(),
                                         fd.get(),     // fileDef

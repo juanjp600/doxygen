@@ -458,7 +458,7 @@ void writeXMLCodeBlock(TextStream &t,FileDef *fd)
   OutputCodeList xmlList;
   xmlList.add<XMLCodeGenerator>(&t);
   xmlList.startCodeFragment("DoxyCode");
-  intf->parseCode(xmlList,    // codeOutList
+  intf->parseTextCode(xmlList,    // codeOutList
                 QCString(),   // scopeName
                 fileToString(fd->absFilePath(),Config_getBool(FILTER_SOURCE_FILES)),
                 langExt,     // lang

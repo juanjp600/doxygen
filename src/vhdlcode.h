@@ -27,7 +27,7 @@ class VHDLCodeParser : public CodeParserInterface
   public:
     VHDLCodeParser();
     virtual ~VHDLCodeParser();
-    void parseCode(OutputCodeList &codeOutIntf,
+    void parseTextCode(OutputCodeList &codeOutIntf,
                    const QCString &scopeName,
                    const QCString &input,
                    SrcLangExt lang,
@@ -43,6 +43,7 @@ class VHDLCodeParser : public CodeParserInterface
                    bool collectXRefs=TRUE
                   );
     void resetCodeParserState();
+    CODE_PARSER_REJECT_BINARY;
   private:
     struct Private;
     std::unique_ptr<Private> p;

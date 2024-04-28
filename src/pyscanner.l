@@ -2250,7 +2250,7 @@ PythonOutlineParser::~PythonOutlineParser()
 }
 
 
-void PythonOutlineParser::parseInput(const QCString &fileName,
+void PythonOutlineParser::parseTextInput(const QCString &fileName,
                                      const char *fileBuf,
                                      const std::shared_ptr<Entry> &root,
                                      ClangTUParser * /*clangParser*/)

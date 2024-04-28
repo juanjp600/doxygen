@@ -406,7 +406,7 @@ void SQLCodeParser::resetCodeParserState()
   yyextra->currentMemberDef = 0;
 }
 
-void SQLCodeParser::parseCode(OutputCodeList &codeOutIntf,
+void SQLCodeParser::parseTextCode(OutputCodeList &codeOutIntf,
                const QCString &/* scopeName */,
                const QCString &input,
                SrcLangExt,

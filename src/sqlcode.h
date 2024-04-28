@@ -31,7 +31,7 @@ class SQLCodeParser : public CodeParserInterface
   public:
     SQLCodeParser();
     virtual ~SQLCodeParser();
-    void parseCode(OutputCodeList &codeOutIntf,
+    void parseTextCode(OutputCodeList &codeOutIntf,
                    const QCString &scopeName,
                    const QCString &input,
                    SrcLangExt,
@@ -47,6 +47,7 @@ class SQLCodeParser : public CodeParserInterface
                    bool collectXRefs=TRUE
                   );
     void resetCodeParserState();
+    CODE_PARSER_REJECT_BINARY;
   private:
     struct Private;
     std::unique_ptr<Private> p;

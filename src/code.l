@@ -4122,7 +4122,7 @@ bool CCodeParser::insideCodeLine() const
   return yyextra->insideCodeLine;
 }
 
-void CCodeParser::parseCode(OutputCodeList &od,const QCString &className,const QCString &s,
+void CCodeParser::parseTextCode(OutputCodeList &od,const QCString &className,const QCString &s,
                 SrcLangExt lang,bool exBlock, const QCString &exName,const FileDef *fd,
                 int startLine,int endLine,bool inlineFragment,
                 const MemberDef *memberDef,bool showLineNumbers,const Definition *searchCtx,

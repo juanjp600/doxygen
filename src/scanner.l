@@ -8258,7 +8258,7 @@ COutlineParser::~COutlineParser()
   scannerYYlex_destroy(p->yyscanner);
 }
 
-void COutlineParser::parseInput(const QCString &fileName,
+void COutlineParser::parseTextInput(const QCString &fileName,
                                 const char *fileBuf,
                                 const std::shared_ptr<Entry> &root,
                                 ClangTUParser *clangParser)
